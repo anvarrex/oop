@@ -69,9 +69,9 @@ class ColoredPoint: public Point{
             printf("ColoredPoint()\n");
             color = "white";
         }
-        ColoredPoint(int x, int y, string color){
-            this->x = x;
-            this->y = y;
+        ColoredPoint(int x, int y, string color):Point(x,y){
+            // this->x = x;
+            // this->y = y;
             printf("ColoredPoint(int x, int y, string color): Point(x, y)\n");
             this->color = color;
         }
@@ -96,22 +96,18 @@ class ColoredPoint: public Point{
 
 class Section{
     protected:
-        Point *p1;
-        Point *p2;
+        Point p1;
+        Point p2;
+        
     public:
         Section(){
             printf("Section()\n");
-            p1 = new Point;
-            p2 = new Point;
         }
-        Section(const Section &s){
+        Section(const Section &s):p1(s.p1), p2(s.p2){
             printf("Section(const Section &s)\n");
-            p1 = new Point(*(s.p1));
-            p2 = new Point(*(s.p2));
+
         }
         ~Section(){
-            delete p1;
-            delete p2;
             printf("~Section()\n");
         }
 };
@@ -139,10 +135,12 @@ int main(){
     // cout << "============================" << endl;
 
     // {
+
     //     ColoredPoint z(1, 2, "black");
-    //     //z.GetColor();
-    //     //z.SetColor("Red");
-    //     //z.GetColor();
+    //     z.GetColor();
+    //     z.SetColor("Red");
+    //     z.GetColor();
+    //     z.printCoo();
     // }
 
     // cout << "============================" << endl;
@@ -152,12 +150,7 @@ int main(){
     //     delete p;
     // }
 
-    Section *s1 = new Section;
-    Section *s2 = new Section(*s1);
-
-    delete s1;
-    delete s2;
-
-    cout << "Конец работы программы\n";
+    Section s1;
+    Section s2(s1);
     return 0;
 }
