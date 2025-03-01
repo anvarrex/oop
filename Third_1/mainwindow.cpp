@@ -75,14 +75,16 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 
 
     if (isResizing){
+
         selecting = false;
 
         int dx = event->pos().x() - lastMousePos.x();
         int dy = event->pos().y() - lastMousePos.y();
 
-        ui->frame->resize(ui->frame->width() + dx, ui->frame->height() + dy);
+        int newWidth = qMax(100, ui->frame->width() + dx);
+        int newHeight = qMax(80, ui->frame->height() + dy);
+        ui->frame->resize(newWidth, newHeight);
         lastMousePos = event->pos();
-        return;
     }
 }
 
@@ -151,6 +153,116 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 
 
 
+void Circle::draw(QPainter &painter, QRect restriction)
+{
+    painter.setBrush(Qt::blue);
+    painter.setClipRect(restriction);
+    painter.drawEllipse(x - rad, y - rad, 2 * rad, 2 * rad);
 
+}
 
+bool Circle::contains(int px, int py)
+{
+    int dx = x - px;
+    int dy = y - py;
+    return (dx * dx + dy * dy) <= (rad * rad);
+}
 
+void Circle::select(QPainter &painter)
+{
+    painter.setBrush(Qt::darkBlue);
+    painter.drawEllipse(x - rad, y - rad, 2 * rad, 2 * rad);
+}
+
+void MyStorage::AddObject(int x, int y)
+{
+    circles.push_back(new Circle(x, y));
+    selected_circles.clear();
+}
+
+void MyStorage::drawCircles(QPainter &painter, QRect restriction)
+{
+    for (int i = 0; i<circles.size();i++){
+        circles[i]->draw(painter, restriction);
+    }
+}
+
+bool MyStorage::isCircle(int x, int y, bool ctrl)
+{
+    bool in = false;
+    vector<Circle*> circlesInPoint;
+    vector<Circle*> unselectedCircles;
+    for (int i = 0; i<circles.size();i++){
+        if (circles[i]->contains(x, y)){
+            circlesInPoint.push_back(circles[i]);
+            if (find(selected_circles.begin(), selected_circles.end(), circles[i]) == selected_circles.end())
+            {
+                if (ctrl == false){
+                    selected_circles.clear();
+                    selected_circles.push_back(circles[i]);
+                }
+                else {
+                    selected_circles.push_back(circles[i]);
+                }
+
+            }
+
+            else {
+                selected_circles.erase(remove(selected_circles.begin(), selected_circles.end(), circles[i]), selected_circles.end());
+                unselectedCircles.push_back(circles[i]);
+
+            }
+            in = true;
+        }
+    }
+
+    qDebug() << "Selected метода isCircle" <<selected_circles;
+    qDebug() << "InPoint метода isCircle" << circlesInPoint;
+    if (circlesInPoint.size() > 1){
+        if (circlesInPoint != unselectedCircles){
+            for (int i = 0; i<circlesInPoint.size(); i++) {
+                if (find(selected_circles.begin(), selected_circles.end(), circlesInPoint[i]) == selected_circles.end())
+                {
+                    selected_circles.push_back(circlesInPoint[i]);
+
+                }
+            }
+        }
+    }
+    circlesInPoint.clear();
+    unselectedCircles.clear();
+
+    return in;
+}
+
+void MyStorage::selectCircles(QPainter &painter)
+{
+    for (int i = 0; i<selected_circles.size();i++) {
+        qDebug() << "метод selectCircles" << selected_circles;
+        selected_circles[i]->select(painter);
+    }
+}
+
+void MyStorage::deleteCircles()
+{
+    for (int i = 0; i<selected_circles.size();i++) {
+        circles.erase(remove(circles.begin(), circles.end(), selected_circles[i]), circles.end());
+    }
+    selected_circles.clear();
+}
+
+void MyStorage::selectCirclesInRect(QRect Rect)
+{
+    qDebug() << "метод selectCirclesInRect";
+    for (int i = 0; i<circles.size();i++) {
+        QRect circleRect(circles[i]->GetX() - 20, circles[i]->GetY() - 20, 40, 40);
+        if (Rect.intersects(circleRect)) {
+            if (find(selected_circles.begin(), selected_circles.end(), circles[i]) == selected_circles.end()){
+                qDebug() << "метод selectcirclesinrect добавлен";
+                selected_circles.push_back(circles[i]);
+            }
+        } else {
+            selected_circles.erase(remove(selected_circles.begin(), selected_circles.end(), circles[i]), selected_circles.end());
+        }
+    }
+}
