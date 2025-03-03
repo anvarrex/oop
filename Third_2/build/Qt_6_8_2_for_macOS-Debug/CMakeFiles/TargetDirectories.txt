@@ -1,0 +1,9 @@
+/Users/anvar/Third_2/build/Qt_6_8_2_for_macOS-Debug/CMakeFiles/Third_2.dir
+/Users/anvar/Third_2/build/Qt_6_8_2_for_macOS-Debug/CMakeFiles/edit_cache.dir
+/Users/anvar/Third_2/build/Qt_6_8_2_for_macOS-Debug/CMakeFiles/rebuild_cache.dir
+/Users/anvar/Third_2/build/Qt_6_8_2_for_macOS-Debug/CMakeFiles/list_install_components.dir
+/Users/anvar/Third_2/build/Qt_6_8_2_for_macOS-Debug/CMakeFiles/install.dir
+/Users/anvar/Third_2/build/Qt_6_8_2_for_macOS-Debug/CMakeFiles/install/local.dir
+/Users/anvar/Third_2/build/Qt_6_8_2_for_macOS-Debug/CMakeFiles/install/strip.dir
+/Users/anvar/Third_2/build/Qt_6_8_2_for_macOS-Debug/CMakeFiles/Third_2_autogen_timestamp_deps.dir
+/Users/anvar/Third_2/build/Qt_6_8_2_for_macOS-Debug/CMakeFiles/Third_2_autogen.dir
