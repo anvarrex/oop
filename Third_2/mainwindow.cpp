@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
     connect(&model, &Model::dataUpdated, this, &MainWindow::UpdateDataForm);
 
     connect(ui->spinBoxA->findChild<QLineEdit *>(), &QLineEdit::returnPressed, this, &MainWindow::on_spinBoxA_EnterPressed);
@@ -103,7 +104,7 @@ void Model::SetValueA(int ValueA)
 void Model::SetValueB(int ValueB)
 {
     if (ValueB!=b) {
-        b = qBound(a, ValueB, c)ы;
+        b = qBound(a, ValueB, c);
         emit dataUpdated();
         qDebug() << "Отправилось уведолмение от SetValueB";
         SaveSetting();

@@ -23,7 +23,6 @@ class Model: public QObject
 
 private:
     int a, b, c;
-    int oldA, oldB, oldC;
 public:
     Model()
     {
@@ -31,9 +30,7 @@ public:
         a = settings.value("A", 10).toInt();
         b = settings.value("B", 50).toInt();
         c = settings.value("C", 90).toInt();
-        oldA = a;
-        oldB = b;
-        oldC = c;
+
     }
     void SetValueA(int ValueA);
     void SetValueB(int ValueB);
