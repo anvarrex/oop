@@ -19,7 +19,9 @@ MainWindow::~MainWindow()
 void MainWindow::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
-    storage.drawCircles(painter, ui->frame->geometry());
+    painter.setBrush(Qt::blue);
+    painter.setClipRect(ui->frame->geometry());
+    storage.drawCircles(painter);
     storage.selectCircles(painter);
 
     if (selecting){
@@ -27,7 +29,6 @@ void MainWindow::paintEvent(QPaintEvent *event)
         painter.setBrush(Qt::NoBrush);
         painter.drawRect(selectionRect.normalized());
     }
-
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event){
@@ -51,7 +52,6 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
             fl = true;
             selecting = false;
             update();
-
         }
 
         if (topLeft || topRight || bottomLeft || bottomRight) {
@@ -153,12 +153,9 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 
 
 
-void Circle::draw(QPainter &painter, QRect restriction)
+void Circle::draw(QPainter &painter)
 {
-    painter.setBrush(Qt::blue);
-    painter.setClipRect(restriction);
     painter.drawEllipse(x - rad, y - rad, 2 * rad, 2 * rad);
-
 }
 
 bool Circle::contains(int px, int py)
@@ -168,7 +165,7 @@ bool Circle::contains(int px, int py)
     return (dx * dx + dy * dy) <= (rad * rad);
 }
 
-void Circle::select(QPainter &painter)
+void Circle::draw_selected(QPainter &painter)
 {
     painter.setBrush(Qt::darkBlue);
     painter.drawEllipse(x - rad, y - rad, 2 * rad, 2 * rad);
@@ -180,10 +177,10 @@ void MyStorage::AddObject(int x, int y)
     selected_circles.clear();
 }
 
-void MyStorage::drawCircles(QPainter &painter, QRect restriction)
+void MyStorage::drawCircles(QPainter &painter)
 {
     for (int i = 0; i<circles.size();i++){
-        circles[i]->draw(painter, restriction);
+        circles[i]->draw(painter);
     }
 }
 
@@ -239,7 +236,7 @@ void MyStorage::selectCircles(QPainter &painter)
 {
     for (int i = 0; i<selected_circles.size();i++) {
         qDebug() << "метод selectCircles" << selected_circles;
-        selected_circles[i]->select(painter);
+        selected_circles[i]->draw_selected(painter);
     }
 }
 

@@ -1,4 +1,4 @@
-    #ifndef MAINWINDOW_H
+#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
@@ -22,14 +22,14 @@ private:
 
 public:
     Circle(int ValueX, int ValueY):x(ValueX), y(ValueY){}
-    void draw(QPainter &painter, QRect restriction);
+    void draw(QPainter &painter);
     bool contains(int px, int py);
-    void select(QPainter &painter);
+    void draw_selected(QPainter &painter);
 
-    auto GetX(){
+    int GetX(){
         return x;
     }
-    auto GetY(){
+    int GetY(){
         return y;
     }
 };
@@ -43,7 +43,7 @@ public:
 
     void AddObject(int x, int y);
 
-    void drawCircles(QPainter &painter, QRect restriction);
+    void drawCircles(QPainter &painter);
 
     bool isCircle(int x, int y, bool ctrl);
 
