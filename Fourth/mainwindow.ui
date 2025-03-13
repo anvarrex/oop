@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QFrame" name="frame">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>30</y>
+      <width>711</width>
+      <height>481</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Shape::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Shadow::Raised</enum>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>37</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Фигуры</string>
+    </property>
+    <addaction name="circle"/>
+    <addaction name="square"/>
+    <addaction name="ellipse"/>
+    <addaction name="rectangle"/>
+    <addaction name="triangle"/>
+    <addaction name="line"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>Цвет</string>
+    </property>
+    <addaction name="chooseColor"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="circle">
+   <property name="text">
+    <string>Круг</string>
+   </property>
+  </action>
+  <action name="square">
+   <property name="text">
+    <string>Квадрат</string>
+   </property>
+  </action>
+  <action name="ellipse">
+   <property name="text">
+    <string>Эллипс</string>
+   </property>
+  </action>
+  <action name="rectangle">
+   <property name="text">
+    <string>Прямоугольник</string>
+   </property>
+  </action>
+  <action name="triangle">
+   <property name="text">
+    <string>Треугольник</string>
+   </property>
+  </action>
+  <action name="line">
+   <property name="text">
+    <string>Линия</string>
+   </property>
+  </action>
+  <action name="choosecolor">
+   <property name="text">
+    <string>Выбрать цвет</string>
+   </property>
+  </action>
+  <action name="action_2">
+   <property name="text">
+    <string>Зеленый</string>
+   </property>
+  </action>
+  <action name="action">
+   <property name="text">
+    <string>Красный</string>
+   </property>
+  </action>
+  <action name="chooseColor">
+   <property name="text">
+    <string>Выбрать цвет</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
