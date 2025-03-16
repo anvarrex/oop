@@ -29,14 +29,14 @@ void MainWindow::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
     painter.setClipRect(ui->frame->geometry());
+    painter.setPen(QPen(Qt::black, 0.5));
     storage.drawShapes(painter);
     storage.drawSelectedShapes(painter);
 
-    // if (selecting){
-    //     painter.setPen(QPen(Qt::black, 2, Qt::DashLine));
-    //     painter.setBrush(Qt::NoBrush);
-    //     painter.drawRect(selectionRect.normalized());
-    // }
+    if (isDrawingLine) {
+        painter.setPen(QPen(Qt::black, 2, Qt::DashLine));
+        painter.drawLine(lineStart, lineEndTemporary);
+    }
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event){
@@ -47,6 +47,13 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
         QPoint PosInFrame = event->pos() - frameGeom.topLeft();
         MousePosCirclePress = event->pos();
         lastMousePos = event->pos();
+
+        for (Shape* shape: storage.GetShapes()){
+            if (shape->contains(event->pos().x(), event->pos().y())){
+                shapesInPoint.push_back(shape);
+            }
+        }
+
         int corner = 10;
 
         bool topLeft = (abs(PosInFrame.x()) < corner && abs(PosInFrame.y()) < corner);
@@ -63,76 +70,126 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
             return;
         }
 
-        if (storage.shapesInPoint(event->pos().x(), event->pos().y()).size()!=0)
+
+        if (shapesInPoint.size()!=0)
         {
-            for (Shape* shapeInPoint: storage.shapesInPoint(event->pos().x(), event->pos().y())){
+            for (Shape* shapeInPoint: shapesInPoint){
                 for (Shape* selected_shape: storage.GetSelectedShapes()){
                     if (shapeInPoint == selected_shape){
-                        isMoving = true;
+                        if (shapeInPoint->isOnEdge(event->pos().x(), event->pos().y())){
+                            if (dynamic_cast<Line*> (shapeInPoint)){
+                                isStartLine = storage.isStartLine(event->pos().x(), event->pos().y(), shapeInPoint);
+                                isResizingShape = true;
+                                return;
+                            }
+                            isResizingShape = true;
+                            return;
+                        }
                     }
                 }
             }
-
-        //     shapesToMove = storage.shapesInPoint(event->pos().x(), event->pos().y());
-        //     storage.selectShapes(storage.shapesInPoint(event->pos().x(), event->pos().y()), ctrl);
-        //     fl = true;
+            for (Shape* shapeInPoint: shapesInPoint){
+                for (Shape* selected_shape: storage.GetSelectedShapes()){
+                    if (shapeInPoint == selected_shape){
+                        isMoving = true;
+                        return;
+                    }
+                }
+            }
         }
 
-
-        if (selected_shape == "Line" && !fl) {
+        if (selected_shape == "Line" && shapesInPoint.size()==0 && frameGeom.contains(event->pos()) ) {
             if (!isDrawingLine) {
                 lineStart = event->pos();
                 isDrawingLine = true;
-            } else {
-                storage.AddObject(new Line(lineStart.x(), lineStart.y(), event->pos().x(), event->pos().y(), selected_color));
-                isDrawingLine = false;
-                update();
+                }
             }
         }
-}
-}
+    }
+
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
 {
     qDebug() << isMoving;
-    // qDebug() << "Маус мув ивент";
-    // if (selecting && ctrl == false && ui->frame->geometry().contains(MousePosCirclePress) && ui->frame->geometry().contains(event->pos())) {
-    //     selectionRect.setTopLeft(MousePosCirclePress);
-    //     selectionRect.setBottomRight(event->pos());
-    //     storage.selectshapesInRect(selectionRect);
-    //     update();
-    // }
-    if (isMoving) {
-        qDebug() << "1ййййй";
-        storage.moveShape(event->pos().x(), event->pos().y(), lastMousePos);
+    qDebug() << "Маус мув ивент";
+
+
+    if (isResizingShape){
+        storage.resizeShape(event->pos().x(), event->pos().y(), lastMousePos, ui->frame->geometry(), isStartLine);
         lastMousePos = event->pos();
-        qDebug() << "2ййййй";
         update();
     }
 
+    if (isDrawingLine) {
+        lineEndTemporary = event->pos();
+        update();
+    }
+
+    if (isMoving) {
+
+        //int deltaX = event->pos().x() - lastMousePos.x();
+        //int deltaY = event->pos().y() - lastMousePos.y();
+
+        //if (storage.canMove(ui->frame->geometry(), deltaX, deltaY)){
+        storage.moveShape(event->pos().x(), event->pos().y(), lastMousePos, ui->frame->geometry());
+        lastMousePos = event->pos();
+        update();
+        //}
+    }
+
     if (isResizing){
+        // selecting = false;
+
+        // int dx = event->pos().x() - lastMousePos.x();
+        // int dy = event->pos().y() - lastMousePos.y();
+
+        // int newWidth = qMax(100, ui->frame->width() + dx);
+        // int newHeight = qMax(80, ui->frame->height() + dy);
+        // ui->frame->resize(newWidth, newHeight);
+        // lastMousePos = event->pos();
         selecting = false;
 
         int dx = event->pos().x() - lastMousePos.x();
         int dy = event->pos().y() - lastMousePos.y();
 
+        // Предварительно вычисляем новые размеры фрейма
         int newWidth = qMax(100, ui->frame->width() + dx);
         int newHeight = qMax(80, ui->frame->height() + dy);
-        ui->frame->resize(newWidth, newHeight);
-        lastMousePos = event->pos();
+
+        // Создаем временный прямоугольник для проверки пересечения с фигурами
+        QRect newFrameRect = ui->frame->geometry();
+        newFrameRect.setWidth(newWidth);
+        newFrameRect.setHeight(newHeight);
+
+        // Проверяем, пересекается ли новый фрейм с какой-либо фигурой
+        bool intersects = false;
+        for (Shape* shape : storage.GetShapes()) {
+            if (shape->intersectsWithFrame(newFrameRect)) {
+                intersects = true;
+                break;
+            }
+        }
+
+        // Если пересечения нет, изменяем размер фрейма
+        if (!intersects) {
+            ui->frame->resize(newWidth, newHeight);
+            lastMousePos = event->pos();
+        }
     }
 
-}
+
+    }
+
+
 
 
 void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 {
     isMoving = false;
+    isResizingShape = false;
     qDebug() << "Маус релиз ивент";
     isResizing = false;
-    selecting = false;
     update();
-
 
     QRect frameGeom = ui->frame->geometry();
     QPoint PosInFrame = event->pos() - frameGeom.topLeft();
@@ -149,35 +206,40 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
         return;
     }
 
+    if (isDrawingLine) {
+        storage.AddObject(new Line(lineStart.x(), lineStart.y(), event->pos().x(), event->pos().y(), selected_color));
+        isDrawingLine = false;
+        update();
+    }
 
 
     if (MousePosCirclePress == event->pos()){
         if (ui->frame->geometry().contains(event->pos())) {
-            if (storage.shapesInPoint(event->pos().x(), event->pos().y()).size()!=0){
-                storage.selectShapes(storage.shapesInPoint(event->pos().x(), event->pos().y()), ctrl);
+            if (shapesInPoint.size()!=0){
+                storage.selectShapes(shapesInPoint, ctrl);
             }
             else{
                 qDebug() << ++counter ;
                 if (selected_shape == "Circle"){
-                    storage.AddObject(new Circle(event->pos().x(), event->pos().y(), selected_color));
+                    storage.AddObject(new Circle(event->pos().x(), event->pos().y(), selected_color, frameGeom));
                 }
                 else if (selected_shape == "Ellipse"){
-                    storage.AddObject(new Ellipse(event->pos().x(), event->pos().y(), selected_color));
+                    storage.AddObject(new Ellipse(event->pos().x(), event->pos().y(), selected_color, frameGeom));
                 }
                 else if (selected_shape == "Rectangle"){
-                    storage.AddObject(new Rectangle(event->pos().x(), event->pos().y(), selected_color));
+                    storage.AddObject(new Rectangle(event->pos().x(), event->pos().y(), selected_color, frameGeom));
                 }
                 else if (selected_shape == "Triangle"){
-                    storage.AddObject(new Triangle(event->pos().x(), event->pos().y(), selected_color));
+                    storage.AddObject(new Triangle(event->pos().x(), event->pos().y(), selected_color, frameGeom));
                 }
-                else if (selected_shape == "Sqaure"){
-                    storage.AddObject(new Square(event->pos().x(), event->pos().y(), selected_color));
+                else if (selected_shape == "Square"){
+                    storage.AddObject(new Square(event->pos().x(), event->pos().y(), selected_color, frameGeom));
                 }
             }
             update();
         }
     }
-    fl = false;
+    shapesInPoint.clear();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -188,10 +250,16 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         update();
     }
 
+    else if (event->modifiers() & Qt::ControlModifier && event->key() == Qt::Key_A) {
+        storage.selectAll();
+        update();
+    }
+
     else if (event->key() == Qt::Key_Control){
         qDebug() << "Ctrl нажата!";
         ctrl = true;
     }
+
 
 
     QMainWindow::keyPressEvent(event);
@@ -207,7 +275,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 
 void MainWindow::openColorDialog()
 {
-    QColor color = QColorDialog::getColor(selected_color, this, "Выберите цвет");
+    QColor color = QColorDialog::getColor(selected_color, this);
     if (color.isValid()) {
         selected_color = color;
         storage.setColor(color);
@@ -247,16 +315,7 @@ void MyStorage::drawShapes(QPainter &painter)
     }
 }
 
-vector <Shape *> MyStorage::shapesInPoint(int x, int y)
-{
-    vector <Shape*> shapesInPoint;
-    for (Shape* shape: shapes){
-        if (shape->contains(x, y)){
-            shapesInPoint.push_back(shape);
-        }
-    }
-    return shapesInPoint;
-}
+
 
 void MyStorage::selectShapes(vector <Shape*> shapesInPoint, bool ctrl)
 {
@@ -283,53 +342,6 @@ void MyStorage::selectShapes(vector <Shape*> shapesInPoint, bool ctrl)
     qDebug() << selected_shapes;
 }
 
-// bool MyStorage::isShape(int x, int y, bool ctrl)
-// {
-//     bool in = false;
-//     vector<Shape*> shapesInPoint;
-//     vector<Shape*> unselectedShapes;
-//     for (int i = 0; i<shapes.size();i++){
-//         if (shapes[i]->contains(x, y)){
-//             shapesInPoint.push_back(shapes[i]);
-//             if (find(selected_shapes.begin(), selected_shapes.end(), shapes[i]) == selected_shapes.end())
-//             {
-//                 if (ctrl == false){
-//                     selected_shapes.clear();
-//                     selected_shapes.push_back(shapes[i]);
-//                 }
-//                 else {
-//                     selected_shapes.push_back(shapes[i]);
-//                 }
-
-//             }
-
-//             else {
-//                 selected_shapes.erase(remove(selected_shapes.begin(), selected_shapes.end(), shapes[i]), selected_shapes.end());
-//                 unselectedShapes.push_back(shapes[i]);
-
-//             }
-//             in = true;
-//         }
-//     }
-
-//     qDebug() << "Selected метода isCircle" <<selected_shapes;
-//     qDebug() << "InPoint метода isCircle" << shapesInPoint;
-//     if (shapesInPoint.size() > 1){
-//         if (shapesInPoint != unselectedshapes){
-//             for (int i = 0; i<shapesInPoint.size(); i++) {
-//                 if (find(selected_shapes.begin(), selected_shapes.end(), shapesInPoint[i]) == selected_shapes.end())
-//                 {
-//                     selected_shapes.push_back(shapesInPoint[i]);
-
-//                 }
-//             }
-//         }
-//     }
-//     shapesInPoint.clear();
-//     unselectedshapes.clear();
-
-//     return in;
-// }
 
 void MyStorage::drawSelectedShapes(QPainter &painter)
 {
@@ -355,21 +367,6 @@ void MyStorage::setColor(QColor color)
     }
 }
 
-// void MyStorage::selectshapesInRect(QRect Rect)
-// {
-//     qDebug() << "метод selectshapesInRect";
-//     for (int i = 0; i<shapes.size();i++) {
-//         QRect circleRect(shapes[i]->GetX() - 20, shapes[i]->GetY() - 20, 40, 40);
-//         if (Rect.intersects(circleRect)) {
-//             if (find(selected_shapes.begin(), selected_shapes.end(), shapes[i]) == selected_shapes.end()){
-//                 qDebug() << "метод selectshapesinrect добавлен";
-//                 selected_shapes.push_back(shapes[i]);
-//             }
-//         } else {
-//             selected_shapes.erase(remove(selected_shapes.begin(), selected_shapes.end(), shapes[i]), selected_shapes.end());
-//         }
-//     }
-// }
 
 void Rectangle::drawSelected(QPainter &painter)
 {
@@ -382,14 +379,14 @@ void Ellipse::drawSelected(QPainter &painter)
 {
     Shape::drawSelected(painter);
     painter.setBrush(color);
-    painter.drawEllipse(x, y, width, height);
+    painter.drawEllipse(QPoint(x, y), widthR, heightR);
 }
 
 void Triangle::drawSelected(QPainter &painter)
 {
     Shape::drawSelected(painter);
     QPolygon polygon;
-    polygon << QPoint(x, y - 20)
+    polygon << QPoint(x, y - size)
             << QPoint(x - size, y + size)
             << QPoint(x + size, y + size);
     painter.setBrush(color);
