@@ -24,17 +24,18 @@ public:
     Shape(int x, int y, QColor color): x(x), y(y), color(color){};
     virtual void draw(QPainter &painter) = 0;
     virtual void drawSelected(QPainter &painter);
-    virtual void move(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom) {};
+    void move(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom);
 
     virtual bool contains(int px, int py) = 0;
     virtual void setColor(QColor color);
-    virtual void resize(int mouseX, int mouseY, QPoint lastMousePoint, QRect frameGeom, bool isStartLine){};
+    virtual void resize(int mouseX, int mouseY, QPoint lastMousePoint, QRect frameGeom, bool isStartLine) = 0;
     virtual bool isOnEdge(int px, int py) {return false;}
     virtual bool isStartLine(int px, int py){return false;}
 
     virtual bool intersectsWithFrame(const QRect frameRect) = 0;
 
-    //virtual bool canMove(QRect frameGeom, int deltaX, int deltaY){return false;}
+    virtual QRect getBoundingBox() const = 0;
+
 
     virtual Shape* copy() = 0;
     virtual void setOffset(int offset);
@@ -51,26 +52,18 @@ public:
     bool contains(int px, int py) override;
     void drawSelected(QPainter &painter) override;
 
-    virtual void move(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom) override;
+
     bool intersectsWithFrame(const QRect frameRect) override;
-
-    // bool canMove(QRect frameGeom, int deltaX, int deltaY) override{
-    //         int newX = x + rad + deltaX;
-    //         int newY = y + rad + deltaY;
-
-    //         if ((newX - rad < frameGeom.x()) || (newY - rad < frameGeom.y()) || (newX + rad > frameGeom.width()+frameGeom.x()) || (newY + rad > frameGeom.height()+frameGeom.y())){
-    //             return false;
-    //         }
-    //         else {
-    //             return true;
-    //         }
-    //     }
 
     bool isOnEdge(int px, int py) override;
 
     void resize(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom, bool isStartLine) override;
 
     Shape* copy() override;
+
+    virtual QRect getBoundingBox() const override {
+        return QRect(x - rad, y - rad, 2 * rad, 2 * rad);
+    }
 };
 
 class Rectangle: public Shape {
@@ -86,15 +79,13 @@ public:
 
     bool isOnEdge(int px, int py) override;
 
-    void move(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom) override;
-
-    // bool canMove(QRect frameGeom, int deltaX, int deltaY) override {
-    //     return (x < frameGeom.x()) || (y < frameGeom.y()) || (x + width > frameGeom.x()+frameGeom.width()) || (y + height > frameGeom.y()+frameGeom.height());
-    // }
-
     void resize(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom, bool isStartLine) override;
 
     Shape* copy() override;
+
+    QRect getBoundingBox() const override {
+        return QRect(x, y, width, height);
+    }
 };
 
 class Ellipse : public Shape {
@@ -112,17 +103,15 @@ public:
 
     void drawSelected(QPainter &painter) override;
 
-    void move(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom) override;
-
-    // bool canMove(QRect frameGeom, int deltaX, int deltaY) override {
-    //     return (x - widthR < frameGeom.x()) || (y - heightR < frameGeom.y()) || (x + widthR > frameGeom.x() + frameGeom.width()) || (y + heightR > frameGeom.y() + frameGeom.height());
-    // }
-
     bool isOnEdge(int px, int py) override;
 
     void resize(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom, bool isStartLine) override;
 
     Shape* copy() override;
+
+    QRect getBoundingBox() const override {
+        return QRect(x - widthR, y - heightR, 2 * widthR, 2 * heightR);
+    }
 };
 
 class Triangle: public Shape {
@@ -136,15 +125,18 @@ public:
 
     bool contains(int px, int py) override;
     void drawSelected(QPainter &painter) override;
-    void move(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom) override;
-
-    // bool canMove(QRect frameGeom, int deltaX, int deltaY) override {
-    //     return (x - size < frameGeom.x()) || (y - size < frameGeom.y()) || (x + size > frameGeom.width()+frameGeom.x()) || (y + size > frameGeom.height()+frameGeom.y());
-    // }
 
     bool isOnEdge(int px, int py) override;
 
     void resize(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom, bool isStartLine) override;
+
+    QRect getBoundingBox() const override {
+        QPolygon trianglePolygon;
+        trianglePolygon << QPoint(x, y - size)
+                        << QPoint(x - size, y + size)
+                        << QPoint(x + size, y + size);
+        return trianglePolygon.boundingRect();
+    }
 
     Shape* copy() override;
 };
@@ -163,13 +155,11 @@ public:
     void drawSelected(QPainter &painter) override;
     bool isOnEdge(int px, int py) override;
 
-    void move(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom) override;
-
-    // bool canMove(QRect frameGeom, int deltaX, int deltaY) override{
-    //     return (x < frameGeom.x()) ||  (y < frameGeom.y()) || (x + width > frameGeom.x()+frameGeom.width()) || (y + height > frameGeom.y()+frameGeom.height());
-    // }
-
     void resize(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom, bool isStartLine) override;
+
+    QRect getBoundingBox() const override{
+        return QRect(x, y, width, height);
+    }
 
     Shape* copy() override;
 };
@@ -183,13 +173,6 @@ public:
     void draw(QPainter &painter) override;
 
     bool intersectsWithFrame(const QRect frameRect) override;
-
-    void move(int mouseX, int mouseY, QPoint lastMousePos, QRect geomFrame) override;
-
-    // bool canMove(QRect frameGeom, int deltaX, int deltaY) override {
-    //     return x < frameGeom.x() || y < frameGeom.y() || x > frameGeom.left() || y > frameGeom.bottom() || xEnd < frameGeom.x() || yEnd < frameGeom.y() || xEnd > frameGeom.left() || yEnd > frameGeom.bottom();
-    // }
-
     bool contains(int px, int py) override;
     void drawSelected(QPainter &painter) override;
     bool isOnEdge(int px, int py) override;
@@ -199,6 +182,10 @@ public:
     Shape* copy() override;
 
     void setOffset(int offset) override;
+
+    QRect getBoundingBox() const override {
+        return QRect(std::min(x, xEnd), std::min(y, yEnd), std::abs(xEnd - x), std::abs(yEnd - y));
+    }
 };
 
 class MyStorage{
@@ -238,14 +225,6 @@ public:
     void pasteShapes();
 
     void resetOffset();
-
-    // bool canMove(QRect frameGeom, int deltaX, int deltaY){
-    //     for (Shape* shape: shapes){
-    //         qDebug() << "canMove" << shape->canMove(frameGeom, deltaX, deltaY);
-    //         return shape->canMove(frameGeom, deltaX, deltaY);
-    //     }
-    //     return false;
-    // }
 
 };
 

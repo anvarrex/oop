@@ -346,19 +346,6 @@ void Circle::drawSelected(QPainter &painter)
     painter.drawEllipse(x - rad, y - rad, 2 * rad, 2 * rad);
 }
 
-void Circle::move(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom){
-    int dx = mouseX - lastMousePos.x();
-    int dy = mouseY - lastMousePos.y();
-
-    x += dx;
-    y += dy;
-
-    //Ограничение в пределах frame
-    if (x - rad < frameGeom.x()) x = rad+frameGeom.x();
-    if (y - rad < frameGeom.y()) y = rad+frameGeom.y();
-    if (x + rad > frameGeom.right()) x = frameGeom.right() - rad;
-    if (y + rad > frameGeom.bottom()) y = frameGeom.bottom() - rad;
-}
 
 bool Circle::intersectsWithFrame(const QRect frameRect){
     QRect circleRect(x - rad, y - rad, 2 * rad, 2 * rad);
@@ -383,10 +370,12 @@ void Circle::resize(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom
     rad += dy;
     if (rad < 15) rad = 15;
 
-    if (x - rad < frameGeom.x()) rad = x - frameGeom.x();
-    if (y - rad < frameGeom.y()) rad = y - frameGeom.y();
-    if (x + rad > frameGeom.width()+frameGeom.x()) rad = frameGeom.x() + frameGeom.width() - x;
-    if (y + rad > frameGeom.height()+frameGeom.y()) rad = frameGeom.y() + frameGeom.height() - y;
+    QRect boundingBox = getBoundingBox();
+
+    if (!frameGeom.contains(boundingBox)) {
+        rad += -dx;
+        rad += -dy;
+    }
 }
 
 Shape *Circle::copy(){
@@ -549,19 +538,6 @@ bool Rectangle::isOnEdge(int px, int py){
     return left || right || top || bottom;
 }
 
-void Rectangle::move(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom) {
-    int dx = mouseX - lastMousePos.x();
-    int dy = mouseY - lastMousePos.y();
-
-    x += dx;
-    y += dy;
-
-    if (x < frameGeom.x()) x = frameGeom.x();
-    if (y < frameGeom.y()) y = frameGeom.y();
-    if (x + width > frameGeom.x()+frameGeom.width()) x = frameGeom.x() + frameGeom.width() - width;
-    if (y + height > frameGeom.y()+frameGeom.height()) y =frameGeom.y() + frameGeom.height() - height;
-}
-
 void Rectangle::resize(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom, bool isStartLine) {
     int dx = mouseX - lastMousePos.x();
     int dy = mouseY - lastMousePos.y();
@@ -570,8 +546,12 @@ void Rectangle::resize(int mouseX, int mouseY, QPoint lastMousePos, QRect frameG
     width = max(60, width);
     height = max(40, height);
 
-    if (x + width > frameGeom.x()+frameGeom.width()) width = frameGeom.x() + frameGeom.width() - x;
-    if (y + height > frameGeom.y()+frameGeom.height()) height =frameGeom.y() + frameGeom.height() - y;
+    QRect boundingBox = getBoundingBox();
+
+    if (!frameGeom.contains(boundingBox)) {
+        width += -dx;
+        height += -dy;
+    }
 }
 
 Shape *Rectangle::copy(){
@@ -616,19 +596,6 @@ void Ellipse::drawSelected(QPainter &painter)
     painter.drawEllipse(QPoint(x, y), widthR, heightR);
 }
 
-void Ellipse::move(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom) {
-    int dx = mouseX - lastMousePos.x();
-    int dy = mouseY - lastMousePos.y();
-
-    x += dx;
-    y += dy;
-
-    // Проверяем, что эллипс не выходит за пределы области
-    if (x - widthR < frameGeom.x()) x = frameGeom.x() + widthR;
-    if (y - heightR < frameGeom.y()) y = frameGeom.y() + heightR;
-    if (x + widthR > frameGeom.x() + frameGeom.width()) x = frameGeom.x() + frameGeom.width() - widthR;
-    if (y + heightR > frameGeom.y() + frameGeom.height()) y = frameGeom.y() + frameGeom.height() - heightR;
-}
 
 bool Ellipse::isOnEdge(int px, int py) {
     double centerX = x;
@@ -655,10 +622,12 @@ void Ellipse::resize(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeo
     widthR = std::max(30, widthR);
     heightR = std::max(20, heightR);
 
-    if (x - widthR < frameGeom.x()) widthR = x - frameGeom.x();
-    if (y - heightR < frameGeom.y()) heightR= y - frameGeom.y();
-    if (x + widthR > frameGeom.x() + frameGeom.width()) widthR = frameGeom.x() + frameGeom.width() - x;
-    if (y + heightR > frameGeom.y() + frameGeom.height()) heightR = frameGeom.y() + frameGeom.height() - y;
+    QRect boundingBox = getBoundingBox();
+
+    if (!frameGeom.contains(boundingBox)) {
+        heightR += -dx;
+        widthR += -dy;
+    }
 
 }
 
@@ -722,19 +691,6 @@ void Triangle::drawSelected(QPainter &painter)
     painter.drawPolygon(polygon);
 }
 
-void Triangle::move(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom) {
-    int dx = mouseX - lastMousePos.x();
-    int dy = mouseY - lastMousePos.y();
-
-    x += dx;
-    y += dy;
-
-    if (x - size < frameGeom.x()) x = size+frameGeom.x();
-    if (y - size < frameGeom.y()) y = size+frameGeom.y();
-    if (x + size > frameGeom.width()+frameGeom.x()) x = frameGeom.x() + frameGeom.width() - size;
-    if (y + size > frameGeom.height()+frameGeom.y()) y = frameGeom.y() + frameGeom.height() - size;
-}
-
 bool Triangle::isOnEdge(int px, int py) {
     QPoint A(x, y - size);
     QPoint B(x - size, y + size);
@@ -773,10 +729,11 @@ void Triangle::resize(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGe
     size += delta;
     size = std::max(30, size);
 
-    if (x - size < frameGeom.x()) size = x - frameGeom.x();
-    if (y - size < frameGeom.y()) size = y - frameGeom.y();
-    if (x + size > frameGeom.width()+frameGeom.x()) size = frameGeom.x() + frameGeom.width() - x;
-    if (y + size > frameGeom.height()+frameGeom.y()) size = frameGeom.y() + frameGeom.height() - y;
+    QRect boundingBox = getBoundingBox();
+
+    if (!frameGeom.contains(boundingBox)) {
+        size += -delta;
+    }
 }
 
 Shape *Triangle::copy() {
@@ -821,18 +778,6 @@ bool Square::isOnEdge(int px, int py){
     return left || right || top || bottom;
 }
 
-void Square::move(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom) {
-    int dx = mouseX - lastMousePos.x();
-    int dy = mouseY - lastMousePos.y();
-
-    x += dx;
-    y += dy;
-
-    if (x < frameGeom.x()) x = frameGeom.x();
-    if (y < frameGeom.y()) y = frameGeom.y();
-    if (x + width > frameGeom.x()+frameGeom.width()) x = frameGeom.x() + frameGeom.width() - width;
-    if (y + height > frameGeom.y()+frameGeom.height()) y =frameGeom.y() + frameGeom.height() - height;
-}
 
 void Square::resize(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom, bool isStartLine) {
     int dx = mouseX - lastMousePos.x();
@@ -856,8 +801,12 @@ void Square::resize(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom
     width = max(minSizeSquare, width);
     height = max(minSizeSquare, height);
 
-    if (x + width > frameGeom.x()+frameGeom.width()) width = frameGeom.x() + frameGeom.width() - x;
-    if (y + height > frameGeom.y()+frameGeom.height()) height =frameGeom.y() + frameGeom.height() - y;
+    QRect boundingBox = getBoundingBox();
+
+    if (!frameGeom.contains(boundingBox)) {
+        width += -delta;
+        height += -delta;
+    }
 }
 
 Shape *Square::copy() {
@@ -881,39 +830,6 @@ bool Line::intersectsWithFrame(const QRect frameRect) {
     return !frameRect.contains(x, y) || !frameRect.contains(xEnd, yEnd);
 }
 
-void Line::move(int mouseX, int mouseY, QPoint lastMousePos, QRect geomFrame) {
-    int dx = mouseX - lastMousePos.x();
-    int dy = mouseY - lastMousePos.y();
-
-    // Проверяем, где будет новая начальная точка
-    int newX = x + dx;
-    int newY = y + dy;
-
-    // Проверяем, где будет новая конечная точка
-    int newXEnd = xEnd + dx;
-    int newYEnd = yEnd + dy;
-
-    // Проверяем, не выйдут ли обе точки за границы фрейма
-    bool isOutOfBounds = false;
-
-    if (newX < geomFrame.x() || newY < geomFrame.y() ||
-        newX > geomFrame.x() + geomFrame.width() || newY > geomFrame.y() + geomFrame.height()) {
-        isOutOfBounds = true;
-    }
-
-    if (newXEnd < geomFrame.x() || newYEnd < geomFrame.y() ||
-        newXEnd > geomFrame.x() + geomFrame.width() || newYEnd > geomFrame.y() + geomFrame.height()) {
-        isOutOfBounds = true;
-    }
-
-    // Если хотя бы одна точка вышла за границу, движение останавливается
-    if (!isOutOfBounds) {
-        x = newX;
-        y = newY;
-        xEnd = newXEnd;
-        yEnd = newYEnd;
-    }
-}
 
 bool Line::contains(int px, int py) {
     int penWidth = 3;
@@ -982,7 +898,7 @@ void Line::resize(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom, 
     int dx = mouseX - lastMousePos.x();
     int dy = mouseY - lastMousePos.y();
 
-    qDebug() << "исСтартЛайн" <<isStartLine;        // Изменение начала линии
+    qDebug() << "исСтартЛайн" <<isStartLine;
     if (isStartLine) {
         // Проверяем, не выйдет ли начало линии за границу фрейма
         int newX = x + dx;
@@ -1025,6 +941,20 @@ void Shape::drawSelected(QPainter &painter)
     qDebug() << "ЭЭ";
     pen.setWidth(2);
     painter.setPen(pen);
+}
+
+void Shape::move(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeom) {
+    int dx = mouseX - lastMousePos.x();
+    int dy = mouseY - lastMousePos.y();
+
+    QRect boundingBox = getBoundingBox();
+
+    QRect newBoundingBox = boundingBox.translated(dx, dy);
+
+    if (frameGeom.contains(newBoundingBox)) {
+        x += dx;
+        y += dy;
+    }
 }
 
 void Shape::setColor(QColor color)
