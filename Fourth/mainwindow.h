@@ -1,7 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-
 #include <QMainWindow>
 #include <QPainter>
 #include <QMouseEvent>
@@ -61,7 +60,7 @@ public:
 
     Shape* copy() override;
 
-    virtual QRect getBoundingBox() const override {
+    QRect getBoundingBox() const override {
         return QRect(x - rad, y - rad, 2 * rad, 2 * rad);
     }
 };

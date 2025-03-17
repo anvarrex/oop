@@ -625,8 +625,8 @@ void Ellipse::resize(int mouseX, int mouseY, QPoint lastMousePos, QRect frameGeo
     QRect boundingBox = getBoundingBox();
 
     if (!frameGeom.contains(boundingBox)) {
-        heightR += -dx;
-        widthR += -dy;
+        heightR += -dy;
+        widthR += -dx;
     }
 
 }
