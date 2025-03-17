@@ -1023,9 +1023,12 @@
  mdp:/Users/anvar/Qt/6.8.2/macos/lib/QtGui.framework/Versions/A/Headers/qwindowdefs.h
  mdp:/Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/QColorDialog
  mdp:/Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/QMainWindow
+ mdp:/Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/QMessageBox
  mdp:/Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qcolordialog.h
  mdp:/Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qdialog.h
+ mdp:/Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qdialogbuttonbox.h
  mdp:/Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qmainwindow.h
+ mdp:/Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qmessagebox.h
  mdp:/Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qsizepolicy.h
  mdp:/Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qtabwidget.h
  mdp:/Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qtwidgets-config.h

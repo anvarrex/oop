@@ -1020,9 +1020,12 @@
   /Users/anvar/Qt/6.8.2/macos/lib/QtGui.framework/Versions/A/Headers/qwindowdefs.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/QColorDialog \
   /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/QMainWindow \
+  /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/QMessageBox \
   /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qcolordialog.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qdialog.h \
+  /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qdialogbuttonbox.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qmainwindow.h \
+  /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qmessagebox.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qsizepolicy.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qtabwidget.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qtwidgets-config.h \
