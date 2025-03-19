@@ -41,6 +41,11 @@ class Desc: public Base {
         }
     };
 
+unique_ptr<Base> func8() {
+    unique_ptr<Base> p = make_unique<Base>();
+    return move(p);
+};
+
 void func1(Base obj) {
     printf ("inside function func1\n") ;
     Desc* c = dynamic_cast<Desc*>(&obj);
