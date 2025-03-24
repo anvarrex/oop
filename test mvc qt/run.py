@@ -151,6 +151,7 @@ class MyWindow(QMainWindow):
             QMessageBox.critical(self, "Ошибка", f"Не удалось открыть файл:\n{str(e)}")
 
         self.setStyleToTable()
+        self.graph.clear()
 
 
 
