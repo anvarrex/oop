@@ -124,7 +124,7 @@ class MyWindow(QMainWindow):
     # Функция для загрузки массива из HDF5 файла
     def loadArr(self):
         options = QFileDialog.Options()  # Открываем диалог для открытия файла
-        file_path, _ = QFileDialog.getOpenFileName(self, "Сохранить в HDF5", "", "HDF5 Files (*.h5)", options=options)
+        file_path, _ = QFileDialog.getOpenFileName(self, "Открыть HDF5", "", "HDF5 Files (*.h5)", options=options)
 
         if not file_path:
             return  # Если путь не был выбран, выходим из функции
@@ -138,6 +138,7 @@ class MyWindow(QMainWindow):
 
         self.setStyleToTable()  # Применяем стили к таблице
         self.graph.clear()  # Очищаем график
+        self.showGraphFlag = False
 
     # Обработчик изменения выделения в таблице
     def selectionChanged(self):
