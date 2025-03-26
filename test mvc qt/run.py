@@ -98,6 +98,7 @@ class MyWindow(QMainWindow):
     # Функция для отображения графика синуса с использованием SciPy
     def showSciPy(self):
         self.graph.clear()  # Очищаем текущий график
+        self.showGraphFlag = False
         x = np.linspace(0, 2 * np.pi, 100)  # Генерируем данные для оси X
         y = np.sin(x)  # Вычисляем значения синуса для оси Y
         self.graph.plot(x, y, pen="b")  # Отображаем график синуса
@@ -176,7 +177,7 @@ class MyWindow(QMainWindow):
 
     # Функция для изменения размера таблицы (массива)
     def changeArr(self):
-        rows, ok1 = QInputDialog.getInt(self, "Изменение размера", "Введите количество строк (от 1 до 20):", self.model.rowCount(), 1, 20)
+        rows, ok1 = QInputDialog.getInt(self, "Изменение размера", "Введите количество строк (от 2 до 20):", self.model.rowCount(), 2, 20)
         if ok1:
             cols, ok2 = QInputDialog.getInt(self, "Изменение размера", "Введите количество столбцов (минимум 4):", self.model.columnCount(), 4, 10)
 
