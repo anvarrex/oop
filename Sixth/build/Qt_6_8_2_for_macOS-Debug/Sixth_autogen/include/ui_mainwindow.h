@@ -13,10 +13,13 @@
 #include <QtGui/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QFrame>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
+#include <QtWidgets/QTextEdit>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -35,6 +38,9 @@ public:
     QAction *ungroup;
     QWidget *centralwidget;
     QFrame *frame;
+    QTextEdit *Commands;
+    QLabel *CmdStory;
+    QPushButton *clearHistory;
     QMenuBar *menubar;
     QMenu *menu;
     QMenu *menu_2;
@@ -45,7 +51,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName("MainWindow");
-        MainWindow->resize(800, 600);
+        MainWindow->resize(800, 681);
         circle = new QAction(MainWindow);
         circle->setObjectName("circle");
         square = new QAction(MainWindow);
@@ -72,6 +78,17 @@ public:
         frame->setGeometry(QRect(20, 20, 751, 491));
         frame->setFrameShape(QFrame::Shape::StyledPanel);
         frame->setFrameShadow(QFrame::Shadow::Raised);
+        Commands = new QTextEdit(centralwidget);
+        Commands->setObjectName("Commands");
+        Commands->setEnabled(true);
+        Commands->setGeometry(QRect(20, 540, 751, 74));
+        Commands->setReadOnly(true);
+        CmdStory = new QLabel(centralwidget);
+        CmdStory->setObjectName("CmdStory");
+        CmdStory->setGeometry(QRect(20, 520, 121, 16));
+        clearHistory = new QPushButton(centralwidget);
+        clearHistory->setObjectName("clearHistory");
+        clearHistory->setGeometry(QRect(20, 620, 131, 32));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName("menubar");
@@ -119,6 +136,8 @@ public:
         chooseColor->setText(QCoreApplication::translate("MainWindow", "\320\222\321\213\320\261\321\200\320\260\321\202\321\214 \321\206\320\262\320\265\321\202", nullptr));
         group->setText(QCoreApplication::translate("MainWindow", "\320\223\321\200\321\203\320\277\320\277\320\270\321\200\320\276\320\262\320\260\321\202\321\214", nullptr));
         ungroup->setText(QCoreApplication::translate("MainWindow", "\320\240\320\260\320\267\320\263\321\200\321\203\320\277\320\277\320\270\321\200\320\276\320\262\320\260\321\202\321\214", nullptr));
+        CmdStory->setText(QCoreApplication::translate("MainWindow", "\320\230\321\201\321\202\320\276\321\200\320\270\321\217 \320\272\320\276\320\274\320\260\320\275\320\264:", nullptr));
+        clearHistory->setText(QCoreApplication::translate("MainWindow", "\320\236\321\207\320\270\321\201\321\202\320\270\321\202\321\214 \320\270\321\201\321\202\320\276\321\200\320\270\321\216", nullptr));
         menu->setTitle(QCoreApplication::translate("MainWindow", "\320\244\320\270\320\263\321\203\321\200\321\213", nullptr));
         menu_2->setTitle(QCoreApplication::translate("MainWindow", "\320\246\320\262\320\265\321\202", nullptr));
         menu_3->setTitle(QCoreApplication::translate("MainWindow", "\320\223\321\200\321\203\320\277\320\277\320\270\321\200\320\276\320\262\320\272\320\260", nullptr));

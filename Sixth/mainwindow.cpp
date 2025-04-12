@@ -1,13 +1,8 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow), storage(&history){
+MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow){
     ui->setupUi(this);
-
-    commands[Qt::Key_A] = new MoveCommand(-10, 0);
-    commands[Qt::Key_W] = new MoveCommand(0, -10);
-    commands[Qt::Key_S] = new MoveCommand(0, 10);
-    commands[Qt::Key_D] = new MoveCommand(10, 0);
 
     connect(ui->circle, &QAction::triggered, this, &MainWindow::setCircle);
     connect(ui->square, &QAction::triggered, this, &MainWindow::setSqaure);
@@ -15,10 +10,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     connect(ui->triangle, &QAction::triggered, this, &MainWindow::setTriangle);
     connect(ui->rectangle, &QAction::triggered, this, &MainWindow::setRectangle);
     connect(ui->chooseColor, &QAction::triggered, this, &MainWindow::openColorDialog);
-    //connect(ui->group, &QAction::triggered, this, &MainWindow::Group);
+    // connect(ui->group, &QAction::triggered, this, &MainWindow::group);
     connect(ui->ungroup, &QAction::triggered, this, &MainWindow::openColorDialog);
 
-    frameGeom = ui->frame->geometry();
+    Params::get().frameGeom = ui->frame->geometry();
 }
 
 
@@ -27,16 +22,13 @@ int counter = 0;
 
 MainWindow::~MainWindow()
 {
-    while (!history.empty()){
-        delete history.top();
-        history.pop();
+    while (!(CmdManager::get().history).empty()){
+        delete (CmdManager::get().history).back();
+        (CmdManager::get().history).pop_back();
     }
 
-    qDebug() << "Delete prototypes:";
-    delete commands[Qt::Key_A];
-    delete commands[Qt::Key_W];
-    delete commands[Qt::Key_S];
-    delete commands[Qt::Key_D];
+
+
 
     delete ui;
 }
@@ -46,8 +38,7 @@ void MainWindow::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.setClipRect(ui->frame->geometry());
     painter.setPen(QPen(Qt::black, 0.5));
-    storage.drawShapes(painter);
-    storage.drawSelectedShapes(painter);
+    StorageManager::get().storage.drawShapes(painter);
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event){
@@ -56,12 +47,11 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
 
     if (event->button() == Qt::LeftButton){
 
-        QRect frameGeom = ui->frame->geometry();
-        QPoint PosInFrame = event->pos() - frameGeom.topLeft();
-        MousePosCirclePress = event->pos();
+        QPoint PosInFrame = event->pos() - Params::get().frameGeom.topLeft();
+        MousePressPos = event->pos();
         lastMousePos = event->pos();
 
-        for (Shape* shape: storage.GetShapes()){
+        for (Shape* shape: StorageManager::get().storage.GetShapes()){
             if (shape->contains(event->pos().x(), event->pos().y())){
                 shapesInPoint.push_back(shape);
             }
@@ -70,36 +60,27 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
         int corner = 10;
 
         bool topLeft = (abs(PosInFrame.x()) < corner && abs(PosInFrame.y()) < corner);
-        bool topRight = (abs(PosInFrame.x()-frameGeom.width()) < corner && abs(PosInFrame.y()) < corner);
-        bool bottomLeft = (abs(PosInFrame.x()) < corner && abs(PosInFrame.y() - frameGeom.height()) < corner);
-        bool bottomRight = (abs(PosInFrame.x()-frameGeom.width()) < corner && abs(PosInFrame.y() - frameGeom.height()) < corner);
-
-        // selecting = true;
+        bool topRight = (abs(PosInFrame.x() - Params::get().frameGeom.width()) < corner && abs(PosInFrame.y()) < corner);
+        bool bottomLeft = (abs(PosInFrame.x()) < corner && abs(PosInFrame.y() - Params::get().frameGeom.height()) < corner);
+        bool bottomRight = (abs(PosInFrame.x() - Params::get().frameGeom.width()) < corner && abs(PosInFrame.y() - Params::get().frameGeom.height()) < corner);
 
 
         if (topLeft || topRight || bottomLeft || bottomRight) {
-            isResizing = true;
+            isResizingFrame = true;
             lastMousePos = event->pos();
             return;
         }
 
-
         if (shapesInPoint.size()!=0)
         {
             for (Shape* shapeInPoint: shapesInPoint){
-                for (Shape* selected_shape: storage.GetSelectedShapes()){
+                for (Shape* selected_shape: StorageManager::get().storage.GetSelectedShapes()){
                     if (shapeInPoint == selected_shape){
                         if (shapeInPoint->isOnEdge(event->pos().x(), event->pos().y())){
                             isResizingShape = true;
                             return;
                         }
-                    }
-                }
-            }
-            for (Shape* shapeInPoint: shapesInPoint){
-                for (Shape* selected_shape: storage.GetSelectedShapes()){
-                    if (shapeInPoint == selected_shape){
-                        isMoving = true;
+                        isMovingShape = true;
                         return;
                     }
                 }
@@ -111,7 +92,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
 {
-    qDebug() << isMoving;
+    qDebug() << isMovingShape;
     qDebug() << "Маус мув ивент";
 
 
@@ -120,28 +101,47 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
         int dx = event->pos().x() - lastMousePos.x();
         int dy = event->pos().y() - lastMousePos.y();
 
-        storage.resizeShape(dx, dy);
+        qDebug() << dx << " " << dy;
+
+        if (dx != 0 || dy !=0){
+            Command *movecommand = new ResizeCommand(dx, dy);
+
+            StorageManager::get().storage.executeCommand(movecommand);
+
+            updateHistory();
+
+            delete movecommand;
+        }
+
+
+
         lastMousePos = event->pos();
 
         update();
     }
 
-    if (isMoving) {
+    if (isMovingShape) {
 
         int dx = event->pos().x() - lastMousePos.x();
         int dy = event->pos().y() - lastMousePos.y();
 
+        if (dx != 0 || dy !=0){
+            Command *movecommand = new MoveCommand(dx, dy);
 
-        storage.moveShape(dx, dy, ui->frame->geometry());
+            StorageManager::get().storage.executeCommand(movecommand);
+
+            updateHistory();
+
+            delete movecommand;
+        }
+
         lastMousePos = event->pos();
 
         update();
 
     }
 
-    if (isResizing){
-
-        selecting = false;
+    if (isResizingFrame){
 
         int dx = event->pos().x() - lastMousePos.x();
         int dy = event->pos().y() - lastMousePos.y();
@@ -157,7 +157,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 
         // Проверяем, пересекается ли новый фрейм с какой-либо фигурой
         bool intersects = false;
-        for (Shape* shape : storage.GetShapes()) {
+        for (Shape* shape : StorageManager::get().storage.GetShapes()) {
             if (shape->intersectsWithFrame(newFrameRect)) {
                 intersects = true;
                 break;
@@ -167,7 +167,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
         // Если пересечения нет, изменяем размер фрейма
         if (!intersects) {
             ui->frame->resize(newWidth, newHeight);
-            frameGeom = ui->frame->geometry();
+            Params::get().frameGeom = ui->frame->geometry();
             lastMousePos = event->pos();
         }
     }
@@ -180,20 +180,22 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 
 void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 {
-    isMoving = false;
-    isResizingShape = false;
     qDebug() << "Маус релиз ивент";
-    isResizing = false;
+
+    isMovingShape = false;
+    isResizingShape = false;
+    isResizingFrame = false;
+
     update();
 
-    QPoint PosInFrame = event->pos() - frameGeom.topLeft();
+    QPoint PosInFrame = event->pos() - Params::get().frameGeom.topLeft();
 
     int corner = 10;
 
     bool topLeft = (abs(PosInFrame.x()) < corner && abs(PosInFrame.y()) < corner);
-    bool topRight = (abs(PosInFrame.x()- frameGeom.width()) < corner && abs(PosInFrame.y()) < corner);
-    bool bottomLeft = (abs(PosInFrame.x()) < corner && abs(PosInFrame.y() - frameGeom.height()) < corner);
-    bool bottomRight = (abs(PosInFrame.x()- frameGeom.width()) < corner && abs(PosInFrame.y() -  frameGeom.height()) < corner);
+    bool topRight = (abs(PosInFrame.x()- Params::get().frameGeom.width()) < corner && abs(PosInFrame.y()) < corner);
+    bool bottomLeft = (abs(PosInFrame.x()) < corner && abs(PosInFrame.y() - Params::get().frameGeom.height()) < corner);
+    bool bottomRight = (abs(PosInFrame.x()- Params::get().frameGeom.width()) < corner && abs(PosInFrame.y() -  Params::get().frameGeom.height()) < corner);
 
 
     if (topLeft || topRight || bottomLeft || bottomRight) {
@@ -201,28 +203,22 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
     }
 
 
-    if (MousePosCirclePress == event->pos()){
+    if (MousePressPos == event->pos()){
         if (ui->frame->geometry().contains(event->pos())) {
             if (shapesInPoint.size()!=0){
-                storage.selectShapes(shapesInPoint, ctrl);
+                Command* command = new SelectCommand(shapesInPoint);
+                command->execute(shapesInPoint[0]);
+                CmdManager::get().history.push_back(command);
+                updateHistory();
             }
             else{
                 qDebug() << ++counter ;
-                if (selected_shape == "Circle"){
-                    storage.AddObject(new Circle(event->pos().x(), event->pos().y(), selected_color, &frameGeom));
-                }
-                else if (selected_shape == "Ellipse"){
-                    storage.AddObject(new Ellipse(event->pos().x(), event->pos().y(), selected_color, &frameGeom));
-                }
-                else if (selected_shape == "Rectangle"){
-                    storage.AddObject(new Rectangle(event->pos().x(), event->pos().y(), selected_color,&frameGeom));
-                }
-                else if (selected_shape == "Triangle"){
-                    storage.AddObject(new Triangle(event->pos().x(), event->pos().y(), selected_color, &frameGeom));
-                }
-                else if (selected_shape == "Square"){
-                    storage.AddObject(new Square(event->pos().x(), event->pos().y(), selected_color, &frameGeom));
-                }
+                Command* newcommand = new AddObjCommand();
+                newcommand->execute(FactoryManager::get().factory.createShape(event->pos().x(), event->pos().y()));
+                CmdManager::get().history.push_back(newcommand);
+                qDebug()<< "stack++";
+                updateHistory();
+
             }
             update();
         }
@@ -232,29 +228,42 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-    Command *movecommand = commands[event->key()];
+    Command *command = CmdManager::get().commands[event->key()];
 
-    if (movecommand!=nullptr){
-        storage.moveShapeFromKeyBoard(movecommand);
+    if (command!=nullptr){
+
+        StorageManager::get().storage.executeCommand(command);
+        //реализовать подписку потом
+        updateHistory();
+
         update();
     }
 
-    else if(event->key() == Qt::Key_Z && !history.empty()){
-        Command *lastcommand = history.top();
+    else if(event->key() == Qt::Key_Z && !CmdManager::get().history.empty()){
+        Command *lastcommand = CmdManager::get().history.back();
         lastcommand->unexecute();
         delete lastcommand;
-        history.pop();
+        CmdManager::get().history.pop_back();
+        updateHistory();
         update();
     }
 
     else if (event->key() == Qt::Key_Backspace || event->key() == Qt::Key_Delete) {
         qDebug() << "Del нажата!";
-        storage.deleteShapes();
+
+        vector <Shape*> shapesToDelete;
+
+        shapesToDelete = StorageManager::get().storage.GetSelectedShapes();
+
+        Command* command = new DeleteCommand(shapesToDelete);
+        command->execute(shapesToDelete[0]);
+        CmdManager::get().history.push_back(command);
+        updateHistory();
         update();
     }
 
     else if (event->modifiers() & Qt::ControlModifier && event->key() == Qt::Key_A) {
-        storage.selectAll();
+        StorageManager::get().storage.selectAll();
         update();
     }
 
@@ -265,7 +274,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
     else if (event->key() == Qt::Key_Control){
         qDebug() << "Ctrl нажата!";
-        ctrl = true;
+        Params::get().ctrl = true;
     }
 
     QMainWindow::keyPressEvent(event);
@@ -275,70 +284,72 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Control){
         qDebug() << "Ctrl отпущена!";
-        ctrl = false;
+        Params::get().ctrl = false;
     }
+}
+
+void MainWindow::updateHistory()
+{
+    ui->Commands->setText(CmdManager::get().showHistory());
 }
 
 void MainWindow::openColorDialog()
 {
-    QColor color = QColorDialog::getColor(selected_color, this);
+    QColor color = QColorDialog::getColor(Params::get().selected_color, this);
+
     if (color.isValid()) {
-        selected_color = color;
-        storage.setColor(color);
+        Params::get().selected_color = color;
+
+        Command* command = new SetColorCommand(color);
+
+        StorageManager::get().storage.executeCommand(command);
+
+        updateHistory();
+
+        delete command;
     }
 }
 
 void MainWindow::setCircle(){
-    selected_shape = "Circle";
+    Params::get().selected_shape = 'C';
 }
 
 void MainWindow::setSqaure(){
-    selected_shape = "Square";
+    Params::get().selected_shape = 'S';
 }
 
 void MainWindow::setEllipse(){
-    selected_shape = "Ellipse";
+    Params::get().selected_shape = 'E';
 }
 
 void MainWindow::setRectangle(){
-    selected_shape = "Rectangle";
+    Params::get().selected_shape = 'R';
 }
 
 
 void MainWindow::setTriangle(){
-    selected_shape = "Triangle";
+    Params::get().selected_shape = 'T';
 }
 
-void MainWindow::group()
-{
+// void MainWindow::group(){
+//     Shape* group = new Group();
+//     for(Shape* shape: storage.GetSelectedShapes()){
+//     }
+// }
 
+Circle::Circle(int ValueX, int ValueY): Shape(ValueX, ValueY){
+    if (x - rad < Params::get().frameGeom.x()) x = rad + Params::get().frameGeom.x();
+    if (y - rad < Params::get().frameGeom.y()) y = rad + Params::get().frameGeom.y();
+    if (x + rad > Params::get().frameGeom.width()+ Params::get().frameGeom.x()) x = Params::get().frameGeom.x() + Params::get().frameGeom.width() - rad;
+    if (y + rad > Params::get().frameGeom.height()+ Params::get().frameGeom.y()) y = Params::get().frameGeom.y() + Params::get().frameGeom.height() - rad;
 }
 
-Circle::Circle(int ValueX, int ValueY, QColor color, QRect* pframeGeom): Shape(ValueX, ValueY, color, pframeGeom){
-    if (x - rad < pframeGeom->x()) x = rad + pframeGeom->x();
-    if (y - rad < pframeGeom->y()) y = rad+ pframeGeom->y();
-    if (x + rad > pframeGeom->width()+ pframeGeom->x()) x = pframeGeom->x() + pframeGeom->width() - rad;
-    if (y + rad > pframeGeom->height()+ pframeGeom->y()) y = pframeGeom->y() + pframeGeom->height() - rad;
-}
-
-void Circle::draw(QPainter &painter)
-{
-    painter.setBrush(color);
-    painter.drawEllipse(x - rad, y - rad, 2 * rad, 2 * rad);
-}
 
 bool Circle::contains(int px, int py)
 {
     int dx = x - px;
     int dy = y - py;
     return (dx * dx + dy * dy) <= (rad * rad);
-}
-
-void Circle::drawSelected(QPainter &painter)
-{
-    Shape::drawSelected(painter);
-    painter.setBrush(color);
-    painter.drawEllipse(x - rad, y - rad, 2 * rad, 2 * rad);
 }
 
 
@@ -358,26 +369,45 @@ bool Circle::isOnEdge(int px, int py){
     } // Проверяем, близка ли точка к границе
 }
 
-void Circle::resize(int dx, int dy){
+bool Circle::resize(int dx, int dy){
+
+    int currrad = rad;
+
     rad += dx;
     rad += dy;
-    if (rad < 15) rad = 15;
+
+    if (rad < 15){
+        rad = 15;
+    };
+
 
     QRect boundingBox = getBoundingBox();
 
-    if (!pframeGeom->contains(boundingBox)) {
-        rad += -dx;
-        rad += -dy;
+    if (!Params::get().frameGeom.contains(boundingBox)) {
+        // Автоматическое уменьшение радиуса до максимально возможного
+        int maxLeft   = x - Params::get().frameGeom.left();
+        int maxTop    = y - Params::get().frameGeom.top();
+        int maxRight  = Params::get().frameGeom.x()+Params::get().frameGeom.width() - x;
+        int maxBottom = Params::get().frameGeom.y()+Params::get().frameGeom.height()- y;
+
+        int maxRad = std::min({maxLeft, maxTop, maxRight, maxBottom});
+
+        // Сохраняем минимально допустимый радиус
+        maxRad = std::max(15, maxRad);
+
+        rad = maxRad;
+
+
     }
+
+    return currrad != rad;
 }
 
 
-void MyStorage::AddObject(Shape *shape)
+void MyStorage::AddObj(Shape *shape)
 {
-    Command *addobjectcommand = new AddObjectCommand(&shapes, &selected_shapes);
-    addobjectcommand->execute(shape);
-    _phistory->push(addobjectcommand);
-    selected_shapes.clear();
+    shapes.push_back(shape);
+    unselectAllShapes();
 }
 
 void MyStorage::drawShapes(QPainter &painter)
@@ -385,13 +415,14 @@ void MyStorage::drawShapes(QPainter &painter)
     for (Shape* shape: shapes){
         shape->draw(painter);
     }
+
 }
 
 
 
-void MyStorage::selectShapes(vector <Shape*> shapesInPoint, bool ctrl)
+void MyStorage::selectShapes(vector<Shape*> shapesInPoint)
 {
-    if (!ctrl)
+    if (!Params::get().ctrl)
     {
         if (selected_shapes == shapesInPoint){
             selected_shapes.clear();
@@ -410,16 +441,18 @@ void MyStorage::selectShapes(vector <Shape*> shapesInPoint, bool ctrl)
             }
         }
     }
+
     qDebug() << shapesInPoint;
     qDebug() << selected_shapes;
-}
 
-
-void MyStorage::drawSelectedShapes(QPainter &painter)
-{
-    for (Shape* shape: selected_shapes){
-        shape->drawSelected(painter);
+    for (Shape* shape: shapes){
+        shape->select(false);
     }
+
+    for (Shape* shape: selected_shapes){
+        shape->select(true);
+    }
+
 }
 
 
@@ -431,14 +464,6 @@ void MyStorage::deleteShapes()
     selected_shapes.clear();
 }
 
-void MyStorage::setColor(QColor color)
-{
-    for (Shape * selected_shape: selected_shapes)
-    {
-        selected_shape->setColor(color);
-    }
-}
-
 vector<Shape *> MyStorage::GetSelectedShapes(){
     return selected_shapes;
 }
@@ -447,30 +472,30 @@ vector<Shape *> MyStorage::GetShapes(){
     return shapes;
 }
 
-void MyStorage::moveShape(int dx, int dy, QRect frameGeom)
+void MyStorage::executeCommand(Command *command)
 {
+    bool fl = false;
+    Command* commandsequence = new CommandsSequence();
     for (Shape* selected_shape: selected_shapes){
-        Command* newcommand = new MoveCommand(dx, dy);
-        newcommand->execute(selected_shape);
-        _phistory->push(newcommand);
+        Command* newcommand = command->clone();
+        fl = newcommand->execute(selected_shape);
+        if (fl){
+            qDebug() << "stack++";
+            dynamic_cast<CommandsSequence*>(commandsequence)->addCommand(newcommand);
+        }
+        else {
+            delete newcommand;
+        }
+    }
+    if (fl){
+        CmdManager::get().history.push_back(commandsequence);
+    }
+    else{
+        delete commandsequence;
     }
 
 }
 
-void MyStorage::moveShapeFromKeyBoard(Command *movecommand)
-{
-    for (Shape* selected_shape: selected_shapes){
-        Command *newcommand = movecommand->clone();
-        newcommand->execute(selected_shape);
-        _phistory->push(newcommand);
-    }
-}
-
-void MyStorage::resizeShape(int dx, int dy){
-    for (Shape* selected_shape: selected_shapes){
-        selected_shape->resize(dx, dy);
-    }
-}
 
 
 void MyStorage::selectAll(){
@@ -478,28 +503,18 @@ void MyStorage::selectAll(){
 }
 
 
-Rectangle::Rectangle(int ValueX, int ValueY, QColor color, QRect* pframeGeom): Shape(ValueX, ValueY, color, pframeGeom), width(60), height(40){
-    if (x < pframeGeom->x()) x = pframeGeom->x();
-    if (y < pframeGeom->y()) y = pframeGeom->y();
-    if (x + width > pframeGeom->x()+pframeGeom->width()) x = pframeGeom->x() + pframeGeom->width() - width;
-    if (y + height > pframeGeom->y()+pframeGeom->height()) y =pframeGeom->y() + pframeGeom->height() - height;
+Rectangle::Rectangle(int ValueX, int ValueY): Shape(ValueX, ValueY), width(60), height(40){
+    if (x < Params::get().frameGeom.x()) x = Params::get().frameGeom.x();
+    if (y < Params::get().frameGeom.y()) y = Params::get().frameGeom.y();
+    if (x + width > Params::get().frameGeom.x()+Params::get().frameGeom.width()) x = Params::get().frameGeom.x() + Params::get().frameGeom.width() - width;
+    if (y + height > Params::get().frameGeom.y()+Params::get().frameGeom.height()) y =Params::get().frameGeom.y() + Params::get().frameGeom.height() - height;
 }
 
-void Rectangle::draw(QPainter &painter) {
-    painter.setBrush(color);
-    painter.drawRect(x, y, width, height);
-}
 
 bool Rectangle::contains(int px, int py) {
     return (px >= x && px <= x + width && py >= y && py <= y + height);
 }
 
-void Rectangle::drawSelected(QPainter &painter)
-{
-    Shape::drawSelected(painter);
-    painter.setBrush(color);
-    painter.drawRect(x, y, width, height);
-}
 
 bool Rectangle::intersectsWithFrame(const QRect frameRect) {
     QRect shapeRect(x, y, width, height);
@@ -515,28 +530,45 @@ bool Rectangle::isOnEdge(int px, int py){
     return left || right || top || bottom;
 }
 
-void Rectangle::resize(int dx, int dy) {
+bool Rectangle::resize(int dx, int dy) {
+
+    int currWidth = width;
+    int currHeight = height;
+
+    // Изменяем размеры
     width += dx;
     height += dy;
-    width = max(60, width);
-    height = max(40, height);
 
+    // Учитываем минимальные размеры
+    width = std::max(60, width);
+    height = std::max(40, height);
+
+    // Получаем текущую границу прямоугольника
     QRect boundingBox = getBoundingBox();
+    QRect frame = Params::get().frameGeom;
 
-    if (!pframeGeom->contains(boundingBox)) {
-        width += -dx;
-        height += -dy;
+    // Проверяем, если выходит за пределы фрейма, откатываем до максимального возможного
+    if (!frame.contains(boundingBox)) {
+        // Ограничиваем размеры прямоугольника
+        if (boundingBox.right() > frame.right()) {
+            width -= (boundingBox.right() - frame.right());
+        }
+        if (boundingBox.bottom() > frame.bottom()) {
+            height -= (boundingBox.bottom() - frame.bottom());
+        }
     }
+
+    return currWidth != width || currHeight != height;
 }
 
 
-Ellipse::Ellipse(int ValueX, int ValueY, QColor color, QRect* pframeGeom) : Shape(ValueX, ValueY, color, pframeGeom), widthR(30), heightR(20){
+Ellipse::Ellipse(int ValueX, int ValueY) : Shape(ValueX, ValueY), widthR(30), heightR(20){
 
     // Проверяем, что эллипс не выходит за пределы области
-    if (x - widthR < pframeGeom->x()) x = pframeGeom->x() + widthR;
-    if (y - heightR < pframeGeom->y()) y = pframeGeom->y() + heightR;
-    if (x + widthR > pframeGeom->x() + pframeGeom->width()) x = pframeGeom->x() + pframeGeom->width() - widthR;
-    if (y + heightR > pframeGeom->y() + pframeGeom->height()) y = pframeGeom->y() + pframeGeom->height() - heightR;
+    if (x - widthR < Params::get().frameGeom.x()) x = Params::get().frameGeom.x() + widthR;
+    if (y - heightR < Params::get().frameGeom.y()) y = Params::get().frameGeom.y() + heightR;
+    if (x + widthR > Params::get().frameGeom.x() + Params::get().frameGeom.width()) x = Params::get().frameGeom.x() + Params::get().frameGeom.width() - widthR;
+    if (y + heightR > Params::get().frameGeom.y() + Params::get().frameGeom.height()) y = Params::get().frameGeom.y() + Params::get().frameGeom.height() - heightR;
 
 }
 
@@ -546,10 +578,7 @@ bool Ellipse::intersectsWithFrame(const QRect frameRect) {
     return !frameRect.contains(ellipseRect);
 }
 
-void Ellipse::draw(QPainter &painter) {
-    painter.setBrush(color);
-    painter.drawEllipse(QPoint(x, y), widthR, heightR);
-}
+
 
 bool Ellipse::contains(int px, int py) {
     double dx = px - x;  // Смещение по X от центра
@@ -559,13 +588,6 @@ bool Ellipse::contains(int px, int py) {
     double b = heightR;  // Полуось по Y (вертикальный радиус)
 
     return (dx * dx) / (a * a) + (dy * dy) / (b * b) <= 1.0;
-}
-
-void Ellipse::drawSelected(QPainter &painter)
-{
-    Shape::drawSelected(painter);
-    painter.setBrush(color);
-    painter.drawEllipse(QPoint(x, y), widthR, heightR);
 }
 
 
@@ -581,41 +603,47 @@ bool Ellipse::isOnEdge(int px, int py) {
     return fabs(equation - 1.0) < 0.3;
 }
 
-void Ellipse::resize(int dx, int dy) {
+bool Ellipse::resize(int dx, int dy) {
 
-    // Изменение размеров эллипса
+    int currWidthR = widthR;
+    int currHeightR = heightR;
+
+    // Увеличиваем размеры
     widthR += dx;
     heightR += dy;
 
-    // Ограничение минимального размера
+    // Минимальные размеры
     widthR = std::max(30, widthR);
     heightR = std::max(20, heightR);
 
+    // Получаем ограничивающий прямоугольник эллипса
     QRect boundingBox = getBoundingBox();
+    QRect frame = Params::get().frameGeom;
 
-    if (!pframeGeom->contains(boundingBox)) {
-        heightR += -dy;
-        widthR += -dx;
+    // Если эллипс выходит за пределы фрейма, откатываем изменения
+    if (!frame.contains(boundingBox)) {
+        // Откатываем размеры до максимально возможных
+        if (boundingBox.right() > frame.right()) {
+            widthR = frame.x()+frame.width() - x;
+        }
+        if (boundingBox.bottom() > frame.bottom()) {
+            heightR = frame.y()+frame.height() - y;
+        }
     }
 
+    // Возвращаем, если размеры изменились
+    return currWidthR != widthR || currHeightR != heightR;
+
 }
 
 
-Triangle::Triangle(int ValueX, int ValueY, QColor color, QRect* pframeGeom): Shape(ValueX, ValueY, color, pframeGeom), size(30){
-    if (x - size < pframeGeom->x()) x = size+pframeGeom->x();
-    if (y - size < pframeGeom->y()) y = size+pframeGeom->y();
-    if (x + size > pframeGeom->width()+pframeGeom->x()) x = pframeGeom->x() + pframeGeom->width() - size;
-    if (y + size > pframeGeom->height()+pframeGeom->y()) y = pframeGeom->y() + pframeGeom->height() - size;
+Triangle::Triangle(int ValueX, int ValueY): Shape(ValueX, ValueY), size(30){
+    if (x - size < Params::get().frameGeom.x()) x = size+Params::get().frameGeom.x();
+    if (y - size < Params::get().frameGeom.y()) y = size+Params::get().frameGeom.y();
+    if (x + size > Params::get().frameGeom.width()+Params::get().frameGeom.x()) x = Params::get().frameGeom.x() + Params::get().frameGeom.width() - size;
+    if (y + size > Params::get().frameGeom.height()+Params::get().frameGeom.y()) y = Params::get().frameGeom.y() + Params::get().frameGeom.height() - size;
 }
 
-void Triangle::draw(QPainter &painter) {
-    painter.setBrush(color);
-    QPolygon polygon;
-    polygon << QPoint(x, y - size)
-            << QPoint(x - size, y + size)
-            << QPoint(x + size, y + size);
-    painter.drawPolygon(polygon);
-}
 
 bool Triangle::intersectsWithFrame(const QRect frameRect) {
     // Проверяем пересечение треугольника с фреймом
@@ -646,16 +674,6 @@ bool Triangle::contains(int px, int py) {
     return fabs(totalArea - (area1 + area2 + area3)) < 1e-6;
 }
 
-void Triangle::drawSelected(QPainter &painter)
-{
-    Shape::drawSelected(painter);
-    QPolygon polygon;
-    polygon << QPoint(x, y - size)
-            << QPoint(x - size, y + size)
-            << QPoint(x + size, y + size);
-    painter.setBrush(color);
-    painter.drawPolygon(polygon);
-}
 
 bool Triangle::isOnEdge(int px, int py) {
     QPoint A(x, y - size);
@@ -679,120 +697,171 @@ bool Triangle::isOnEdge(int px, int py) {
             pointToLineDistance(C, A, P) < threshold);
 }
 
-void Triangle::resize(int dx, int dy) {
+bool Triangle::resize(int dx, int dy) {
+
+    int currSize = size;
 
     int delta;
-    if (dy < 0 || dx < 0){
+    if (dx < 0 || dy < 0) {
         delta = std::min(dx, dy);
-    }
-    else {
+    } else {
         delta = std::max(dx, dy);
     }
 
-
     size += delta;
-    size = std::max(30, size);
+
+    // Учитываем минимальный размер
+    if (size < 30)
+        size = 30;
 
     QRect boundingBox = getBoundingBox();
+    QRect frame = Params::get().frameGeom;
 
-    if (!pframeGeom->contains(boundingBox)) {
-        size += -delta;
+    if (!frame.contains(boundingBox)) {
+        // Вычислим максимально возможный size при текущем положении
+        int maxLeft   = x - frame.left();
+        int maxTop    = y - frame.top();
+        int maxRight  = frame.x() + frame.width() - x;
+        int maxBottom = frame.y() + frame.height() - y;
+
+        // Треугольник вверх — size влияет на высоту вверх и ширину в стороны
+        int maxHorizontal = std::min(maxLeft, maxRight);
+        int maxVertical = std::min(maxTop, maxBottom);
+
+        int maxAllowedSize = std::min(maxHorizontal, maxVertical);
+
+        size = std::max(30, maxAllowedSize);
     }
+
+    return size != currSize;
 }
 
 
 
-Square::Square(int ValueX, int ValueY, QColor color, QRect* pframeGeom): Shape(ValueX, ValueY, color, pframeGeom), width(40), height(40){
-    if (x < pframeGeom->x()) x = pframeGeom->x();
-    if (y < pframeGeom->y()) y = pframeGeom->y();
-    if (x + width > pframeGeom->x()+pframeGeom->width()) x = pframeGeom->x() + pframeGeom->width() - width;
-    if (y + height > pframeGeom->y()+pframeGeom->height()) y = pframeGeom->y() + pframeGeom->height() - height;
+Square::Square(int ValueX, int ValueY): Shape(ValueX, ValueY), size(40) {
+    if (x < Params::get().frameGeom.x()) x = Params::get().frameGeom.x();
+    if (y < Params::get().frameGeom.y()) y = Params::get().frameGeom.y();
+    if (x + size > Params::get().frameGeom.x()+Params::get().frameGeom.width()) x = Params::get().frameGeom.x() + Params::get().frameGeom.width() - size;
+    if (y + size > Params::get().frameGeom.y()+Params::get().frameGeom.height()) y = Params::get().frameGeom.y() + Params::get().frameGeom.height() - size;
 }
 
-void Square::draw(QPainter &painter) {
-    painter.setBrush(color);
-    painter.drawRect(x, y, width, height);
-}
 
 bool Square::contains(int px, int py) {
-    return (px >= x && px <= x + width && py >= y && py <= y + height);
+    return (px >= x && px <= x + size && py >= y && py <= y + size);
 }
 
 bool Square::intersectsWithFrame(const QRect frameRect) {
     // Проверяем пересечение квадрата с фреймом
-    QRect shapeRect(x, y, width, height);
+    QRect shapeRect(x, y, size, size);
     return !frameRect.contains(shapeRect);
-}
-
-void Square::drawSelected(QPainter &painter)
-{
-    Shape::drawSelected(painter);
-    painter.setBrush(color);
-    painter.drawRect(x, y, width, height);
 }
 
 bool Square::isOnEdge(int px, int py){
     int edgeThreshold = 5;  // Толщина зоны для изменения размеров
     bool left = abs(px - x) < edgeThreshold;
-    bool right = abs(px - (x + width)) < edgeThreshold;
+    bool right = abs(px - (x + size)) < edgeThreshold;
     bool top = abs(py - y) < edgeThreshold;
-    bool bottom = abs(py - (y + height)) < edgeThreshold;
+    bool bottom = abs(py - (y + size)) < edgeThreshold;
     return left || right || top || bottom;
 }
 
 
-void Square::resize(int dx, int dy) {
+bool Square::resize(int dx, int dy) {
 
+    int currsize = size;
+
+    // Вычисляем, на сколько нужно изменить размер
     int delta;
-
-    if (dy < 0 || dx < 0){
-        delta = min(dx, dy);
-    }
-    else {
-        delta = max(dx, dy);
+    if (dy < 0 || dx < 0) {
+        delta = std::min(dx, dy);
+    } else {
+        delta = std::max(dx, dy);
     }
 
+    // Изменяем размер квадрата
+    size += delta;
 
-    width += delta;
-    height += delta;
+    // Учитываем минимальный размер
+    if (size < 40) {
+        size = 40;
+    }
 
-    int minSizeSquare = 40;
-
-    width = max(minSizeSquare, width);
-    height = max(minSizeSquare, height);
-
+    // Получаем boundingBox квадрата
     QRect boundingBox = getBoundingBox();
+    QRect frame = Params::get().frameGeom;
 
-    if (!pframeGeom->contains(boundingBox)) {
-        width += -delta;
-        height += -delta;
+    // Проверяем, если размер выходит за пределы фрейма
+    if (!frame.contains(boundingBox)) {
+        // Ограничиваем размер, если выходит за пределы фрейма
+        int maxWidth = frame.x()+frame.width() - x;
+        int maxHeight = frame.y()+frame.height() - y;
+
+        // Устанавливаем максимальный размер, если выходит за границы
+        size = std::min(maxWidth, maxHeight);
+
+        // Если размер меньше минимального, устанавливаем минимальный
+        size = std::max(40, size);
+        return false;
     }
+
+    return currsize != size;
 }
 
-void Shape::drawSelected(QPainter &painter)
-{
-    qDebug() << color;
-    QPen pen(Qt::DashLine);
-    pen.setColor(Qt::black);
-    qDebug() << "ЭЭ";
-    pen.setWidth(2);
-    painter.setPen(pen);
-}
-
-void Shape::move(int dx, int dy) {
+bool Shape::move(int &dx, int &dy) {
 
     QRect boundingBox = getBoundingBox();
 
     QRect newboundingBox = boundingBox.translated(dx, dy);
 
-    if (pframeGeom->contains(newboundingBox)) {
+    if (Params::get().frameGeom.contains(newboundingBox)) {
         x += dx;
         y += dy;
+        return true;
+    }
+
+    else {
+
+        int maxDx = dx;
+        int maxDy = dy;
+
+
+        if (newboundingBox.left() < Params::get().frameGeom.left()) {
+            maxDx = Params::get().frameGeom.left() - boundingBox.left();
+        } else if (newboundingBox.right() > Params::get().frameGeom.right()) {
+            maxDx = Params::get().frameGeom.right() - boundingBox.right();
+        }
+
+
+        if (newboundingBox.top() < Params::get().frameGeom.top()) {
+            maxDy = Params::get().frameGeom.top() - boundingBox.top();
+        } else if (newboundingBox.bottom() > Params::get().frameGeom.bottom()) {
+            maxDy = Params::get().frameGeom.bottom() - boundingBox.bottom();
+        }
+
+        x += maxDx;
+        y += maxDy;
+
+        dx = maxDx;
+        dy = maxDy;
+
+        if (maxDx!=0 or maxDy!=0){
+            return true;
+        }
+
+        return false;
     }
 }
 
 void Shape::setColor(QColor color)
 {
     this->color = color;
+}
+
+
+void MainWindow::on_clearHistory_clicked()
+{
+    CmdManager::get().clearHistory();
+    update();
+    updateHistory();
 }
 
