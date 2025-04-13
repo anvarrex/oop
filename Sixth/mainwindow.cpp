@@ -10,14 +10,15 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     connect(ui->triangle, &QAction::triggered, this, &MainWindow::setTriangle);
     connect(ui->rectangle, &QAction::triggered, this, &MainWindow::setRectangle);
     connect(ui->chooseColor, &QAction::triggered, this, &MainWindow::openColorDialog);
-    // connect(ui->group, &QAction::triggered, this, &MainWindow::group);
-    connect(ui->ungroup, &QAction::triggered, this, &MainWindow::openColorDialog);
+    connect(ui->group, &QAction::triggered, this, &MainWindow::group);
+    connect(ui->ungroup, &QAction::triggered, this, &MainWindow::ungroup);
 
     Params::get().frameGeom = ui->frame->geometry();
 }
 
 
 int counter = 0;
+
 
 
 MainWindow::~MainWindow()
@@ -251,19 +252,27 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     else if (event->key() == Qt::Key_Backspace || event->key() == Qt::Key_Delete) {
         qDebug() << "Del нажата!";
 
+
+
         vector <Shape*> shapesToDelete;
 
         shapesToDelete = StorageManager::get().storage.GetSelectedShapes();
 
-        Command* command = new DeleteCommand(shapesToDelete);
-        command->execute(shapesToDelete[0]);
-        CmdManager::get().history.push_back(command);
-        updateHistory();
-        update();
+
+        if (shapesToDelete.size()!=0){
+            Command* command = new DeleteCommand(shapesToDelete);
+            command->execute(shapesToDelete[0]);
+            CmdManager::get().history.push_back(command);
+            updateHistory();
+            update();
+        }
+
     }
 
     else if (event->modifiers() & Qt::ControlModifier && event->key() == Qt::Key_A) {
-        StorageManager::get().storage.selectAll();
+        Command *newcommand = new SelectCommand(StorageManager::get().storage.GetShapes());
+        CmdManager::get().history.push_back(newcommand);
+        updateHistory();
         update();
     }
 
@@ -331,11 +340,35 @@ void MainWindow::setTriangle(){
     Params::get().selected_shape = 'T';
 }
 
-// void MainWindow::group(){
-//     Shape* group = new Group();
-//     for(Shape* shape: storage.GetSelectedShapes()){
-//     }
-// }
+void MainWindow::group(){
+    if (StorageManager::get().storage.GetSelectedShapes().size()<2){
+        QMessageBox::warning(this, "Внимание", "Выберите хотя бы 2 фигуры!");
+        return;
+    }
+    Shape* shape = nullptr;
+    Command* newcommand = new GroupCommand();
+    newcommand->execute(shape);
+    CmdManager::get().history.push_back(newcommand);
+    QMessageBox::information(this, "Заголовок", "Группировка выполнена!");
+    updateHistory();
+    update();
+}
+
+void MainWindow::ungroup(){
+    bool isGroup = true;
+    if(StorageManager::get().storage.GetSelectedShapes().size()!=1){
+        QMessageBox::warning(this, "Внимание", "Выберите одну группу!");
+        return;
+    }
+    Command* newcommand = new UnGroupCommand();
+    newcommand->execute(StorageManager::get().storage.GetSelectedShapes()[0]);
+    CmdManager::get().history.push_back(newcommand);
+    QMessageBox::information(this, "Заголовок", "Разгруппировка выполнена!");
+    updateHistory();
+
+    update();
+}
+
 
 Circle::Circle(int ValueX, int ValueY): Shape(ValueX, ValueY){
     if (x - rad < Params::get().frameGeom.x()) x = rad + Params::get().frameGeom.x();
@@ -354,7 +387,7 @@ bool Circle::contains(int px, int py)
 
 
 bool Circle::intersectsWithFrame(const QRect frameRect){
-    QRect circleRect(x - rad, y - rad, 2 * rad, 2 * rad);
+    QRect circleRect = getBoundingBox();
     return !frameRect.contains(circleRect);
 }
 
@@ -442,6 +475,7 @@ void MyStorage::selectShapes(vector<Shape*> shapesInPoint)
         }
     }
 
+    qDebug() << "MyStorage::selectShapes";
     qDebug() << shapesInPoint;
     qDebug() << selected_shapes;
 
@@ -461,6 +495,7 @@ void MyStorage::deleteShapes()
     for (Shape* selected_shape: selected_shapes){
         shapes.erase(remove(shapes.begin(), shapes.end(), selected_shape), shapes.end());
     }
+    // qDebug() << shapes;
     selected_shapes.clear();
 }
 
@@ -498,9 +533,10 @@ void MyStorage::executeCommand(Command *command)
 
 
 
-void MyStorage::selectAll(){
-    selected_shapes = shapes;
-}
+// void MyStorage::selectAll(){
+//     selected_shapes = shapes;
+//     selec
+// }
 
 
 Rectangle::Rectangle(int ValueX, int ValueY): Shape(ValueX, ValueY), width(60), height(40){
@@ -623,6 +659,13 @@ bool Ellipse::resize(int dx, int dy) {
     // Если эллипс выходит за пределы фрейма, откатываем изменения
     if (!frame.contains(boundingBox)) {
         // Откатываем размеры до максимально возможных
+        if (boundingBox.left() < frame.left()) {
+            widthR = x - frame.x();
+        }
+        if (boundingBox.top() < frame.top()) {
+            heightR = y - frame.y();
+        }
+
         if (boundingBox.right() > frame.right()) {
             widthR = frame.x()+frame.width() - x;
         }

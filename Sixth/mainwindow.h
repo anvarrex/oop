@@ -36,19 +36,45 @@ private:
         return it != state.end() ? it->second: 0;
     }
 
+public:
+
     MementoShapes(){
         qDebug() << "MementoShapes()";
     }
 
-public:
     virtual ~MementoShapes(){
         qDebug() << "~MementoShapes()";
     };
 };
 
+class MementoGroup: public MementoShapes{
+private:
+    vector<MementoShapes*> childMementos;
+public:
+
+
+
+    void addChildMemento(MementoShapes* memento){
+        childMementos.push_back(memento);
+    }
+
+    const vector<MementoShapes*>& getChildMementos(){
+        return childMementos;
+    }
+
+    ~MementoGroup(){
+        for (auto m: childMementos){
+            delete m;
+        }
+    }
+
+
+};
+
 
 class MementoStorage{
 private:
+
     friend class MyStorage;
 
     vector<Shape*> state_shapes;
@@ -138,7 +164,7 @@ public:
         isSelected = Select;
     }
 
-    bool move(int &dx, int &dy);
+    virtual bool move(int &dx, int &dy);
 
     virtual bool resize(int dx, int dy) = 0;
 
@@ -403,85 +429,201 @@ public:
     }
 };
 
-// class Group: public Shape{
-// private:
-//     vector <Shape*> _shapes;
+class Group: public Shape {
+private:
+    vector <Shape*> _shapes;
 
-// public:
-//     Group(){
-//         qDebug()<<"Group()\n";
-//     }
+public:
+    Group(){
+        qDebug()<<"Group()\n";
+    }
 
-//     void addShapes(Shape* shape){
-//         _shapes.push_back(shape);
-//     }
+    void addShapes(Shape* shape){
+        _shapes.push_back(shape);
+    }
 
-//     void draw(QPainter &painter) override{
-//         for (Shape* shape: _shapes){
-//             shape->draw(painter);
-//         }
-//     };
+    vector<Shape*> getShapes(){
+        return _shapes;
+    }
 
+    void draw(QPainter &painter) override
+    {
+        for (Shape* shape: _shapes){
+            shape->draw(painter);
+        }
 
-//     void move(int dx, int dy){
-//         for (Shape* shape: _shapes){
-//             shape->move(dx, dy);
-//         }
-//     };
+        if (isSelected){
+            QPen pen;
+            pen.setColor("blue");
+            pen.setWidth(2);
+            painter.setPen(pen);
 
-//     bool contains(int px, int py) override {
-//         for (Shape* shape: _shapes){
-//             if(shape->contains(px, py)){return true;}
-//         }
-//         return false;
-//     };
+            painter.setBrush(Qt::NoBrush);
 
-//     void setColor(QColor color) override {
-//         for (Shape* shape: _shapes){
-//             shape->setColor(color);
-//         }
+            painter.drawRect(getBoundingBox());
+            painter.setPen(QPen(Qt::black, 0.5));
+        }
+    };
 
-//     };
+    bool move(int &dx, int &dy) override {
+        if (_shapes.empty()) {
+            return false; // Нельзя перемещать пустую группу
+        }
 
-//     virtual bool resize(int dx, int dy) override{
-//         for (Shape* shape){
-//             shape->resize();
-//         }
-//     };
+        QRect boundingBox = getBoundingBox();
+        QRect newBoundingBox = boundingBox.translated(dx, dy);
+        const QRect& frame = Params::get().frameGeom;
 
-//     virtual bool isOnEdge(int px, int py) override {
-//         for (Shape* shape: _shapes){
-//             if (shape->isOnEdge(px, py)){
-//                 return true;
-//             };
-//         }
-//         return false;
-//     }
+        // Если полностью внутри фрейма - перемещаем все фигуры
+        if (frame.contains(newBoundingBox)) {
+            for (Shape* shape : _shapes) {
+                int shapeDx = dx;
+                int shapeDy = dy;
+                shape->move(shapeDx, shapeDy);
+            }
+            return true;
+        }
 
-//     virtual bool intersectsWithFrame(const QRect frameRect) override {return false;};
+        // Корректировка перемещения при выходе за границы
+        int maxDx = dx;
+        int maxDy = dy;
 
-//     QRect getBoundingBox(){
+        if (newBoundingBox.left() < frame.left()) {
+            maxDx = frame.left() - boundingBox.left();
+        }
+        else if (newBoundingBox.right() > frame.right()) {
+            maxDx = frame.right() - boundingBox.right();
+        }
 
-//         int minX = 99999;
-//         int minY = 99999;
-//         int maxX = -1;
-//         int maxY = -1;
+        if (newBoundingBox.top() < frame.top()) {
+            maxDy = frame.top() - boundingBox.top();
+        }
+        else if (newBoundingBox.bottom() > frame.bottom()) {
+            maxDy = frame.bottom() - boundingBox.bottom();
+        }
 
-//         for (Shape* shape: _shapes){
-//             QRect BoundingBoxShape = shape->getBoundingBox();
-//             minX = min(BoundingBoxShape.x(), minX);
-//             minY = min(BoundingBoxShape.y(), minY);
-//             maxX = max(BoundingBoxShape.x()+BoundingBoxShape.width(), maxX);
-//             maxY = max(BoundingBoxShape.y()+BoundingBoxShape.height(), maxY);
-//         }
+        // Если перемещение невозможно
+        if (maxDx == 0 && maxDy == 0) {
+            return false;
+        }
 
-//         return QRect(minX, minY, maxX, maxY);
-//     };
+        // Применяем скорректированное перемещение
+        dx = maxDx;
+        dy = maxDy;
 
-//     ~Group(){
-//         qDebug() << "~Group()";
-//     }
-// };
+        for (Shape* shape : _shapes) {
+            int shapeDx = dx;
+            int shapeDy = dy;
+            shape->move(shapeDx, shapeDy);
+        }
+
+        return true;
+    }
+
+    bool contains(int px, int py) override {
+        for (Shape* shape: _shapes){
+            if(shape->contains(px, py)){return true;}
+        }
+        return false;
+    };
+
+    void setColor(QColor color) override {
+        for (Shape* shape: _shapes){
+            shape->setColor(color);
+        }
+
+    };
+
+    bool resize(int dx, int dy) override {
+
+        if (_shapes.empty()) return false;
+
+        bool success = true;
+
+        vector<MementoShapes*> mementos;
+
+        for (Shape* shape : _shapes) {
+            mementos.push_back(shape->createMemento());
+        }
+
+        for (Shape* shape : _shapes) {
+            success = success && shape->resize(dx, dy);
+            if (!success) break;
+        }
+
+        if (!success) {
+            for (size_t i = 0; i < mementos.size(); ++i) {
+                _shapes[i]->updateFromMemento(mementos[i]);
+            }
+        }
+
+        for (MementoShapes* m : mementos) {
+            delete m;
+        }
+
+        return success;
+
+    };
+
+    void select(bool fl) override {
+        for (Shape* shape:_shapes){
+            shape->select(fl);
+        }
+        isSelected = fl;
+    }
+
+    virtual bool isOnEdge(int px, int py) override {
+        for (Shape* shape: _shapes){
+            if (shape->isOnEdge(px, py)){
+                return true;
+            };
+        }
+        return false;
+    }
+
+    virtual bool intersectsWithFrame(const QRect frameRect) override {return false;};
+
+    QRect getBoundingBox() const override {
+
+        int minX = INT_MAX;
+        int minY = INT_MAX;
+        int maxX = INT_MIN;
+        int maxY = INT_MIN;
+
+        for (Shape* shape: _shapes){
+            QRect BoundingBoxShape = shape->getBoundingBox();
+            minX = min(BoundingBoxShape.x(), minX);
+            minY = min(BoundingBoxShape.y(), minY);
+            maxX = max(BoundingBoxShape.x()+BoundingBoxShape.width(), maxX);
+            maxY = max(BoundingBoxShape.y()+BoundingBoxShape.height(), maxY);
+        }
+
+        return QRect(minX, minY, maxX-minX, maxY-minY);
+    };
+
+    MementoShapes* createMemento() override{
+        MementoGroup* groupMemento = new MementoGroup();
+
+        for (Shape* shape:_shapes){
+            groupMemento->addChildMemento(shape->createMemento());
+        }
+
+        return groupMemento;
+    };
+
+    virtual void updateFromMemento(MementoShapes* memento) override {
+        MementoGroup* groupMemento = dynamic_cast<MementoGroup*>(memento);
+        const vector<MementoShapes*>& childMementos = groupMemento->getChildMementos();
+
+        for (size_t i = 0; i < _shapes.size(); ++i) {
+            _shapes[i]->updateFromMemento(childMementos[i]);
+        }
+    }
+
+    ~Group(){
+        qDebug() << "~Group()";
+    }
+};
 
 class ShapeFactory{
 public:
@@ -590,8 +732,6 @@ public:
 
     void executeCommand(Command* newcommand);
 
-    void selectAll();
-
     MementoStorage* createMemento(){
         MementoStorage* memento = new MementoStorage();
         memento->setState(shapes, selected_shapes);
@@ -604,6 +744,58 @@ public:
         for (Shape* shape: selected_shapes){
             shape->select(true);
         }
+    }
+
+    Group* MakeGroup(){
+        // Создаем новую группу
+        Group* newGroup = new Group();
+
+        // Переносим фигуры в группу и удаляем из основного хранилища
+        for (Shape* shape : selected_shapes) {
+            // Добавляем фигуру в группу
+            newGroup->addShapes(shape);
+
+            // Удаляем фигуру из основного списка
+            auto it = std::find(shapes.begin(), shapes.end(), shape);
+            if (it != shapes.end()) {
+                shapes.erase(it);
+            }
+        }
+
+        // Очищаем выделение (так как фигуры теперь внутри группы)
+        selected_shapes.clear();
+
+        // Добавляем группу в хранилище
+        shapes.push_back(newGroup);
+
+        // Выделяем новую группу
+        selected_shapes.push_back(newGroup);
+        newGroup->select(true);
+
+        return newGroup;
+    }
+
+    Group* UnGroup(Shape* group){
+        Group* d = dynamic_cast<Group*>(group);
+        if (d){
+            auto it = std::find(shapes.begin(), shapes.end(), group);
+            if (it != shapes.end()) {
+                shapes.erase(it);
+            }
+            selected_shapes.clear();
+            for (Shape* shape_in_group: d->getShapes()){
+                shapes.push_back(shape_in_group);
+                selected_shapes.push_back(shape_in_group);
+            }
+
+        }
+
+
+
+        qDebug() << "Storage::Ungroup()";
+        qDebug() << "shapes:" << shapes;
+        qDebug() << "selected shapes:" << selected_shapes;
+        return d;
     }
 
     virtual ~MyStorage(){
@@ -821,6 +1013,77 @@ public:
     }
 };
 
+class GroupCommand: public Command{
+private:
+    MementoStorage* state = nullptr;
+    Group* group = nullptr;
+public:
+    GroupCommand(){
+        qDebug() << "GroupCommand()";
+    }
+
+    QString show() override {
+        return QString("Group %1 created").arg(reinterpret_cast<quintptr>(group), 0, 16);
+    }
+
+    bool execute(Shape* shape) override{
+        qDebug() << "GroupCommand::execute()";
+        state = StorageManager::get().storage.createMemento();
+        group = StorageManager::get().storage.MakeGroup();
+        return true;
+    }
+
+    void unexecute() override{
+        qDebug()<<"GroupCommand::execute()";
+        StorageManager::get().storage.UpdateFromMemento(state);
+        delete group;
+    }
+
+    Command * clone() override {
+        return new GroupCommand();
+    };
+
+    ~GroupCommand(){
+        qDebug()<< "~GroupCommand()";
+        delete state;
+    }
+};
+
+class UnGroupCommand: public Command{
+private:
+    MementoStorage* state = nullptr;
+    Group* group = nullptr;
+public:
+    UnGroupCommand(){
+        qDebug() << "UnroupCommand()";
+    }
+
+    QString show() override {
+        return QString("%1 ungrouped").arg(reinterpret_cast<quintptr>(group), 0, 16);
+    }
+
+    bool execute(Shape* shape) override{
+        qDebug() << "UnGroupCommand::execute()";
+        state = StorageManager::get().storage.createMemento();
+        group = StorageManager::get().storage.UnGroup(shape);
+        return true;
+    }
+
+    void unexecute() override{
+        qDebug()<<"GroupCommand::execute()";
+        StorageManager::get().storage.UpdateFromMemento(state);
+    }
+
+    Command * clone() override {
+        return new UnGroupCommand();
+    };
+
+    ~UnGroupCommand(){
+        qDebug()<< "~UnGroupCommand()";
+        delete state;
+    }
+};
+
 class DeleteCommand: public Command{
 private:
     vector<Shape*> _shapesToDelete;
@@ -906,19 +1169,7 @@ public:
     }
 };
 
-class GroupCommand: public Command{
-private:
-    Shape* _shape;
-public:
-    GroupCommand(){
-        qDebug() << "GroupCommand()";
-    }
 
-    bool execute(Shape* shape){
-        _shape = shape;
-        return true;
-    }
-};
 
 
 class CommandsSequence: public Command{
@@ -928,7 +1179,7 @@ public:
     QString show(){
         QString result;
         for (Command* cmd: commandSequence){
-            result += cmd->show() + '\n';
+            result += cmd->show() + ' ';
         }
         return result;
     };
@@ -1050,7 +1301,7 @@ protected:
     void setLine();
     void setTriangle();
     void group();
-
+    void ungroup();
 private slots:
     void on_clearHistory_clicked();
 
