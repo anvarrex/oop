@@ -36,6 +36,8 @@ public:
     QAction *chooseColor;
     QAction *group;
     QAction *ungroup;
+    QAction *saveas;
+    QAction *open;
     QWidget *centralwidget;
     QFrame *frame;
     QTextEdit *Commands;
@@ -45,6 +47,7 @@ public:
     QMenu *menu;
     QMenu *menu_2;
     QMenu *menu_3;
+    QMenu *menu_4;
     QStatusBar *statusbar;
 
     void setupUi(QMainWindow *MainWindow)
@@ -71,6 +74,10 @@ public:
         group->setObjectName("group");
         ungroup = new QAction(MainWindow);
         ungroup->setObjectName("ungroup");
+        saveas = new QAction(MainWindow);
+        saveas->setObjectName("saveas");
+        open = new QAction(MainWindow);
+        open->setObjectName("open");
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName("centralwidget");
         frame = new QFrame(centralwidget);
@@ -99,11 +106,14 @@ public:
         menu_2->setObjectName("menu_2");
         menu_3 = new QMenu(menubar);
         menu_3->setObjectName("menu_3");
+        menu_4 = new QMenu(menubar);
+        menu_4->setObjectName("menu_4");
         MainWindow->setMenuBar(menubar);
         statusbar = new QStatusBar(MainWindow);
         statusbar->setObjectName("statusbar");
         MainWindow->setStatusBar(statusbar);
 
+        menubar->addAction(menu_4->menuAction());
         menubar->addAction(menu->menuAction());
         menubar->addAction(menu_2->menuAction());
         menubar->addAction(menu_3->menuAction());
@@ -118,6 +128,8 @@ public:
         menu_3->addSeparator();
         menu_3->addAction(group);
         menu_3->addAction(ungroup);
+        menu_4->addAction(saveas);
+        menu_4->addAction(open);
 
         retranslateUi(MainWindow);
 
@@ -136,11 +148,14 @@ public:
         chooseColor->setText(QCoreApplication::translate("MainWindow", "\320\222\321\213\320\261\321\200\320\260\321\202\321\214 \321\206\320\262\320\265\321\202", nullptr));
         group->setText(QCoreApplication::translate("MainWindow", "\320\223\321\200\321\203\320\277\320\277\320\270\321\200\320\276\320\262\320\260\321\202\321\214", nullptr));
         ungroup->setText(QCoreApplication::translate("MainWindow", "\320\240\320\260\320\267\320\263\321\200\321\203\320\277\320\277\320\270\321\200\320\276\320\262\320\260\321\202\321\214", nullptr));
+        saveas->setText(QCoreApplication::translate("MainWindow", "\320\241\320\276\321\205\321\200\320\260\320\275\320\270\321\202\321\214 \320\262 \321\204\320\260\320\271\320\273", nullptr));
+        open->setText(QCoreApplication::translate("MainWindow", "\320\236\321\202\320\272\321\200\321\213\321\202\321\214 \321\204\320\260\320\271\320\273", nullptr));
         CmdStory->setText(QCoreApplication::translate("MainWindow", "\320\230\321\201\321\202\320\276\321\200\320\270\321\217 \320\272\320\276\320\274\320\260\320\275\320\264:", nullptr));
         clearHistory->setText(QCoreApplication::translate("MainWindow", "\320\236\321\207\320\270\321\201\321\202\320\270\321\202\321\214 \320\270\321\201\321\202\320\276\321\200\320\270\321\216", nullptr));
         menu->setTitle(QCoreApplication::translate("MainWindow", "\320\244\320\270\320\263\321\203\321\200\321\213", nullptr));
         menu_2->setTitle(QCoreApplication::translate("MainWindow", "\320\246\320\262\320\265\321\202", nullptr));
         menu_3->setTitle(QCoreApplication::translate("MainWindow", "\320\223\321\200\321\203\320\277\320\277\320\270\321\200\320\276\320\262\320\272\320\260", nullptr));
+        menu_4->setTitle(QCoreApplication::translate("MainWindow", "\320\244\320\260\320\271\320\273", nullptr));
     } // retranslateUi
 
 };

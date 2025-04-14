@@ -6,6 +6,7 @@
 #include <QMouseEvent>
 #include <QColorDialog>
 #include <QMessageBox>
+#include <QFileDialog>
 
 using namespace std;
 
@@ -186,6 +187,9 @@ public:
         return QPoint(x, y);
     }
 
+    virtual void save(FILE* stream) = 0;
+    virtual void load(FILE* stream) = 0;
+
     virtual ~Shape(){
         qDebug() << "~Shape()";
     };
@@ -224,6 +228,18 @@ public:
         memento->setState("color",  color.rgb());
         return memento;
     }
+
+    virtual void save(FILE* stream) override {
+        qDebug() << "Circle::save(FILE* stream)";
+        fprintf(stream, "C\n");
+        fprintf(stream, "%d %d %d %u\n", x, y, rad, color.rgb());
+    };
+    virtual void load(FILE* stream) override {
+        unsigned int colorValue;
+        qDebug() << "Circle::load(FILE* stream)";
+        fscanf(stream, "%d %d %d %u\n", &x, &y, &rad, &colorValue);
+        color = QColor::fromRgb(colorValue);
+    };
 
     void updateFromMemento(MementoShapes* memento) override {
         x = memento->getState("x");
@@ -269,6 +285,19 @@ public:
         memento->setState("color", color.rgb());
         return memento;
     }
+
+    void save(FILE* stream) override {
+        qDebug() << "Rectangle::save(FILE* stream)";
+        fprintf(stream, "R\n");
+        fprintf(stream, "%d %d %d %d %u\n", x, y, width, height, color.rgb());
+    };
+
+    void load(FILE* stream) override {
+        unsigned int colorValue;
+        qDebug() << "Rectangle::load(FILE* stream)";
+        fscanf(stream, "%d %d %d %d %u\n", &x, &y, &width, &height, &colorValue);
+        color = QColor::fromRgb(colorValue);
+    };
 
     void updateFromMemento(MementoShapes* memento) override {
         x = memento->getState("x");
@@ -327,6 +356,18 @@ public:
         heightR = memento->getState("heightR");
     }
 
+    virtual void save(FILE* stream) override {
+        qDebug() << "Ellipse::save(FILE* stream)";
+        fprintf(stream, "E\n");
+        fprintf(stream, "%d %d %d %d %u\n", x, y, widthR, heightR, color.rgb());
+    };
+    virtual void load(FILE* stream) override {
+        unsigned int colorValue;
+        qDebug() << "Ellipse::load(FILE* stream)";
+        fscanf(stream, "%d %d %d %d %u\n", &x, &y, &widthR, &heightR, &colorValue);
+        color = QColor::fromRgb(colorValue);
+    };
+
     ~Ellipse(){
         qDebug() << "~Ellipse()";
     }
@@ -380,6 +421,18 @@ public:
         size = memento->getState("size");
     }
 
+    virtual void save(FILE* stream) override {
+        qDebug() << "Triangle::save(FILE* stream)";
+        fprintf(stream, "T\n");
+        fprintf(stream, "%d %d %d %u\n", x, y, size, color.rgb());
+    };
+    virtual void load(FILE* stream) override {
+        unsigned int colorValue;
+        qDebug() << "Triangle::load(FILE* stream)";
+        fscanf(stream, "%d %d %d %u\n", &x, &y, &size, &colorValue);
+        color = QColor::fromRgb(colorValue);
+    };
+
     ~Triangle(){
         qDebug() << "~Triangle()";
     }
@@ -424,10 +477,95 @@ public:
         size = memento->getState("size");
     }
 
+    virtual void save(FILE* stream) override {
+        qDebug() << "Square::save(FILE* stream)";
+        fprintf(stream, "S\n");
+        fprintf(stream, "%d %d %d %u\n", x, y, size, color.rgb());
+    };
+    virtual void load(FILE* stream) override {
+        unsigned int colorValue;
+        qDebug() << "Square::load(FILE* stream)";
+        fscanf(stream, "%d %d %d %u\n", &x, &y, &size, &colorValue);
+        color = QColor::fromRgb(colorValue);
+    };
+
     ~Square(){
         qDebug() << "~Sqaure()";
     }
 };
+
+
+class ShapeFactory{
+public:
+    virtual Shape* createShape(int x, int y) = 0;
+    virtual ~ShapeFactory(){};
+};
+
+class MyShapeFactory: public ShapeFactory{
+
+public:
+    MyShapeFactory(){
+        qDebug() << "MyShapeFactory()";
+    }
+
+    Shape* createShape(int x, int y) override {
+        Shape *shape = nullptr;
+        char code = Params::get().selected_shape;
+        switch (code){
+        case 'C':
+            shape = new Circle(x, y);
+            break;
+        case 'R':
+            shape = new Rectangle(x, y);
+            break;
+        case 'E':
+            shape = new Ellipse(x, y);
+            break;
+        case 'S':
+            shape = new Square(x, y);
+            break;
+        case 'T':
+            shape = new Triangle(x, y);
+            break;
+        default:;
+        }
+        return shape;
+    }
+
+    ~MyShapeFactory(){
+        qDebug() << "~MyShapeFactory()";
+    }
+};
+
+class FactoryManager {
+
+private:
+    FactoryManager(){
+        qDebug() << "FactoryManager()";
+    }
+
+    FactoryManager(const FactoryManager& other) = delete;
+
+    FactoryManager& operator=(const FactoryManager&) = delete;
+
+    virtual ~FactoryManager(){
+        qDebug() << "~FactoryManager()";
+    }
+
+public:
+
+    ShapeFactory* factory = nullptr;
+
+    void setFactory(ShapeFactory* pfactory){
+        factory = pfactory;
+    }
+
+    static FactoryManager& get(){
+        static FactoryManager factorymanager;
+        return factorymanager;
+    }
+};
+
 
 class Group: public Shape {
 private:
@@ -572,7 +710,7 @@ public:
         isSelected = fl;
     }
 
-    virtual bool isOnEdge(int px, int py) override {
+    bool isOnEdge(int px, int py) override {
         for (Shape* shape: _shapes){
             if (shape->isOnEdge(px, py)){
                 return true;
@@ -581,7 +719,7 @@ public:
         return false;
     }
 
-    virtual bool intersectsWithFrame(const QRect frameRect) override {return false;};
+    bool intersectsWithFrame(const QRect frameRect) override {return false;};
 
     QRect getBoundingBox() const override {
 
@@ -611,7 +749,7 @@ public:
         return groupMemento;
     };
 
-    virtual void updateFromMemento(MementoShapes* memento) override {
+    void updateFromMemento(MementoShapes* memento) override {
         MementoGroup* groupMemento = dynamic_cast<MementoGroup*>(memento);
         const vector<MementoShapes*>& childMementos = groupMemento->getChildMementos();
 
@@ -620,75 +758,43 @@ public:
         }
     }
 
+    void save(FILE* stream) override {
+        qDebug() << "Group::save(FILE* stream)";
+        fprintf(stream, "G\n");
+        fprintf(stream, "%zu\n", _shapes.size());
+
+        for (Shape* shape : _shapes) {
+            shape->save(stream);
+        }
+    };
+
+    void load(FILE* stream) override {
+        size_t count;
+        Shape* shape;
+        qDebug() << "Group::load(FILE* stream)";
+        fscanf(stream, "%zu\n", &count);
+
+        for (int i = 0; i<count; i++){
+            fscanf(stream, "%s", &Params::get().selected_shape);
+            if (Params::get().selected_shape == 'G'){
+                shape = new Group();
+            }
+            else {
+                shape = FactoryManager::get().factory->createShape(0, 0);
+            }
+            if (shape != nullptr) {
+                shape->load(stream);
+                _shapes.push_back(shape) ;
+            }
+        }
+    };
+
     ~Group(){
         qDebug() << "~Group()";
     }
 };
 
-class ShapeFactory{
-public:
-    virtual Shape* createShape(int x, int y) = 0;
-    virtual ~ShapeFactory(){};
-};
 
-class MyShapeFactory: public ShapeFactory{
-
-public:
-    MyShapeFactory(){
-        qDebug() << "MyShapeFactory()";
-    }
-
-    Shape* createShape(int x, int y) override {
-        Shape *shape = nullptr;
-        char code = Params::get().selected_shape;
-        switch (code){
-            case 'C':
-                shape = new Circle(x, y);
-                break;
-            case 'R':
-                shape = new Rectangle(x, y);
-                break;
-            case 'E':
-                shape = new Ellipse(x, y);
-                break;
-            case 'S':
-                shape = new Square(x, y);
-                break;
-            case 'T':
-                shape = new Triangle(x, y);
-                break;
-            default:;
-        }
-        return shape;
-    }
-
-    ~MyShapeFactory(){
-        qDebug() << "~MyShapeFactory()";
-    }
-};
-
-class FactoryManager {
-private:
-    FactoryManager(){
-        qDebug() << "FactoryManager()";
-    }
-
-    FactoryManager(const FactoryManager& other) = delete;
-
-    FactoryManager& operator=(const FactoryManager&) = delete;
-
-    virtual ~FactoryManager(){
-        qDebug() << "~FactoryManager()";
-    }
-public:
-
-    MyShapeFactory factory;
-
-    static FactoryManager& get(){
-        static FactoryManager factorymanager;
-        return factorymanager;
-    }
-};
 
 
 class Command;
@@ -797,6 +903,38 @@ public:
         qDebug() << "selected shapes:" << selected_shapes;
         return d;
     }
+
+    void saveShapes(FILE* stream){
+        qDebug() << "Storage::saveShapes(FILE* stream)";
+        fprintf(stream, "%zu\n", shapes.size());
+        for (Shape* shape: shapes){
+            shape->save(stream);
+        }
+
+    }
+
+    void loadShapes(FILE* stream){
+        size_t count;
+        Shape* shape;
+        qDebug() << "Storage::saveShapes(FILE* stream)";
+        fscanf(stream, "%zu\n", &count);
+
+        for (int i = 0; i<count; i++){
+            fscanf(stream, "%s", &Params::get().selected_shape);
+            if (Params::get().selected_shape == 'G'){
+                shape = new Group();
+            }
+            else {
+                shape = FactoryManager::get().factory->createShape(0, 0);
+            }
+            if (shape != nullptr) {
+                shape->load(stream);
+                shapes.push_back(shape) ;
+            }
+        }
+
+    }
+
 
     virtual ~MyStorage(){
         qDebug() <<  "~MyStorage()";
@@ -1302,6 +1440,9 @@ protected:
     void setTriangle();
     void group();
     void ungroup();
+    void saveas();
+    void open();
+
 private slots:
     void on_clearHistory_clicked();
 
@@ -1310,6 +1451,7 @@ private:
     Ui::MainWindow *ui;
 
     vector <Shape*> shapesInPoint;
+
 
     QPoint lastMousePos;
 

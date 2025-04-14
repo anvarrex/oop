@@ -338,6 +338,22 @@
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__exception/nested_exception.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__exception/operations.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__exception/terminate.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/copy_options.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/directory_entry.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/directory_iterator.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/directory_options.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/file_status.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/file_time_type.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/file_type.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/filesystem_error.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/operations.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/path.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/path_iterator.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/perm_options.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/perms.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/recursive_directory_iterator.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/space_info.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/u8path.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__format/buffer.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__format/concepts.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/__format/enable_insertable.h \
@@ -698,6 +714,7 @@
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/array \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/atomic \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/bit \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/bitset \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cassert \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cctype \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/cerrno \
@@ -720,10 +737,13 @@
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/errno.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/exception \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/execution \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/filesystem \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/functional \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/initializer_list \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/iomanip \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/ios \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/iosfwd \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/istream \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/iterator \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/limits \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/limits.h \
@@ -737,6 +757,7 @@
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/new \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/numeric \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/optional \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/ostream \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/ratio \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/stdbool.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1/stddef.h \
@@ -866,6 +887,7 @@
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qbytearrayalgorithms.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qbytearraylist.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qbytearrayview.h \
+  /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qcalendar.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qchar.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qcompare.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qcompare_impl.h \
@@ -882,12 +904,18 @@
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qcoreevent.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qdarwinhelpers.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qdatastream.h \
+  /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qdatetime.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qdeadlinetimer.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qdebug.h \
+  /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qdir.h \
+  /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qdirlisting.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qelapsedtimer.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qendian.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qeventloop.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qexceptionhandling.h \
+  /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qfile.h \
+  /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qfiledevice.h \
+  /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qfileinfo.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qflags.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qfloat16.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qforeach.h \
@@ -960,6 +988,7 @@
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qtdeprecationmarkers.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qtenvironmentvariables.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qtextstream.h \
+  /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qtimezone.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qtmetamacros.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qtnoop.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qtpreprocessorsupport.h \
@@ -1019,11 +1048,13 @@
   /Users/anvar/Qt/6.8.2/macos/lib/QtGui.framework/Versions/A/Headers/qvectornd.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtGui.framework/Versions/A/Headers/qwindowdefs.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/QColorDialog \
+  /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/QFileDialog \
   /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/QMainWindow \
   /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/QMessageBox \
   /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qcolordialog.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qdialog.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qdialogbuttonbox.h \
+  /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qfiledialog.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qmainwindow.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qmessagebox.h \
   /Users/anvar/Qt/6.8.2/macos/lib/QtWidgets.framework/Versions/A/Headers/qsizepolicy.h \

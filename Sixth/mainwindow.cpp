@@ -13,7 +13,11 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     connect(ui->group, &QAction::triggered, this, &MainWindow::group);
     connect(ui->ungroup, &QAction::triggered, this, &MainWindow::ungroup);
 
+    connect(ui->saveas, &QAction::triggered, this, &MainWindow::saveas);
+    connect(ui->open, &QAction::triggered, this, &MainWindow::open);
+
     Params::get().frameGeom = ui->frame->geometry();
+    FactoryManager::get().setFactory(new MyShapeFactory());
 }
 
 
@@ -215,7 +219,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
             else{
                 qDebug() << ++counter ;
                 Command* newcommand = new AddObjCommand();
-                newcommand->execute(FactoryManager::get().factory.createShape(event->pos().x(), event->pos().y()));
+                newcommand->execute(FactoryManager::get().factory->createShape(event->pos().x(), event->pos().y()));
                 CmdManager::get().history.push_back(newcommand);
                 qDebug()<< "stack++";
                 updateHistory();
@@ -368,6 +372,41 @@ void MainWindow::ungroup(){
 
     update();
 }
+
+void MainWindow::saveas()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, "Сохранить файл", QDir::homePath(), "Text Files (*.txt)");
+    if (fileName.isEmpty()) return;
+
+
+    FILE* stream = fopen(fileName.toStdString().c_str(), "w");
+    if (!stream) {
+        QMessageBox::critical(this, "Ошибка", "Не удалось открыть файл");
+        return;
+    }
+    else{
+        StorageManager::get().storage.saveShapes(stream);
+    }
+    fclose(stream);
+}
+
+void MainWindow::open()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Открыть файл", QDir::homePath(), "Text Files (*.txt)");
+    if (fileName.isEmpty()) return;
+
+    FILE* stream = fopen(fileName.toStdString().c_str(), "r");
+    if (!stream) {
+        QMessageBox::critical(this, "Ошибка", "Не удалось открыть файл");
+        return;
+    }
+    else{
+        StorageManager::get().storage.loadShapes(stream);
+    }
+    fclose(stream);
+}
+
+
 
 
 Circle::Circle(int ValueX, int ValueY): Shape(ValueX, ValueY){
