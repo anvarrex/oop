@@ -17,7 +17,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     connect(ui->open, &QAction::triggered, this, &MainWindow::open);
 
     Params::get().frameGeom = ui->frame->geometry();
-    FactoryManager::get().setFactory(new MyShapeFactory());
+    factory = new MyShapeFactory;
+    FactoryManager::get().setFactory(factory);
+
 }
 
 
@@ -32,8 +34,7 @@ MainWindow::~MainWindow()
         (CmdManager::get().history).pop_back();
     }
 
-
-
+    delete factory;
 
     delete ui;
 }
@@ -238,7 +239,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     if (command!=nullptr){
 
         StorageManager::get().storage.executeCommand(command);
-        //реализовать подписку потом
+
         updateHistory();
 
         update();

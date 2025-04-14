@@ -498,7 +498,9 @@ public:
 class ShapeFactory{
 public:
     virtual Shape* createShape(int x, int y) = 0;
-    virtual ~ShapeFactory(){};
+    virtual ~ShapeFactory(){
+        qDebug() << "~ShapeFactory()";
+    };
 };
 
 class MyShapeFactory: public ShapeFactory{
@@ -972,9 +974,6 @@ public:
         return storagemanager;
     }
 };
-
-
-
 
 
 class Command{
@@ -1452,6 +1451,7 @@ private:
 
     vector <Shape*> shapesInPoint;
 
+    ShapeFactory* factory = nullptr;
 
     QPoint lastMousePos;
 
