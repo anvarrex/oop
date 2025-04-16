@@ -1,0 +1,178 @@
+/********************************************************************************
+** Form generated from reading UI file 'mainwindow.ui'
+**
+** Created by: Qt User Interface Compiler version 6.8.2
+**
+** WARNING! All changes made in this file will be lost when recompiling UI file!
+********************************************************************************/
+
+#ifndef UI_MAINWINDOW_H
+#define UI_MAINWINDOW_H
+
+#include <QtCore/QVariant>
+#include <QtGui/QAction>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QStatusBar>
+#include <QtWidgets/QTextEdit>
+#include <QtWidgets/QTreeWidget>
+#include <QtWidgets/QWidget>
+
+QT_BEGIN_NAMESPACE
+
+class Ui_MainWindow
+{
+public:
+    QAction *open;
+    QAction *saveas;
+    QAction *circle;
+    QAction *square;
+    QAction *ellipse;
+    QAction *triangle;
+    QAction *rectangle;
+    QAction *group;
+    QAction *ungroup;
+    QAction *chooseColor;
+    QAction *connectshapes;
+    QWidget *centralwidget;
+    QFrame *frame;
+    QTextEdit *Commands;
+    QPushButton *clearHistory;
+    QLabel *label;
+    QTreeWidget *treeWidget;
+    QMenuBar *menubar;
+    QMenu *menu;
+    QMenu *menu_2;
+    QMenu *menu_3;
+    QMenu *menu_4;
+    QMenu *menu_5;
+    QStatusBar *statusbar;
+
+    void setupUi(QMainWindow *MainWindow)
+    {
+        if (MainWindow->objectName().isEmpty())
+            MainWindow->setObjectName("MainWindow");
+        MainWindow->resize(1119, 696);
+        MainWindow->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
+        open = new QAction(MainWindow);
+        open->setObjectName("open");
+        saveas = new QAction(MainWindow);
+        saveas->setObjectName("saveas");
+        circle = new QAction(MainWindow);
+        circle->setObjectName("circle");
+        square = new QAction(MainWindow);
+        square->setObjectName("square");
+        ellipse = new QAction(MainWindow);
+        ellipse->setObjectName("ellipse");
+        triangle = new QAction(MainWindow);
+        triangle->setObjectName("triangle");
+        rectangle = new QAction(MainWindow);
+        rectangle->setObjectName("rectangle");
+        group = new QAction(MainWindow);
+        group->setObjectName("group");
+        ungroup = new QAction(MainWindow);
+        ungroup->setObjectName("ungroup");
+        chooseColor = new QAction(MainWindow);
+        chooseColor->setObjectName("chooseColor");
+        connectshapes = new QAction(MainWindow);
+        connectshapes->setObjectName("connectshapes");
+        centralwidget = new QWidget(MainWindow);
+        centralwidget->setObjectName("centralwidget");
+        frame = new QFrame(centralwidget);
+        frame->setObjectName("frame");
+        frame->setGeometry(QRect(20, 10, 901, 511));
+        frame->setFrameShape(QFrame::Shape::StyledPanel);
+        frame->setFrameShadow(QFrame::Shadow::Raised);
+        Commands = new QTextEdit(centralwidget);
+        Commands->setObjectName("Commands");
+        Commands->setGeometry(QRect(20, 550, 891, 74));
+        clearHistory = new QPushButton(centralwidget);
+        clearHistory->setObjectName("clearHistory");
+        clearHistory->setGeometry(QRect(20, 630, 141, 32));
+        label = new QLabel(centralwidget);
+        label->setObjectName("label");
+        label->setGeometry(QRect(20, 530, 111, 16));
+        treeWidget = new QTreeWidget(centralwidget);
+        treeWidget->setObjectName("treeWidget");
+        treeWidget->setGeometry(QRect(930, 10, 181, 511));
+        MainWindow->setCentralWidget(centralwidget);
+        menubar = new QMenuBar(MainWindow);
+        menubar->setObjectName("menubar");
+        menubar->setGeometry(QRect(0, 0, 1119, 37));
+        menu = new QMenu(menubar);
+        menu->setObjectName("menu");
+        menu_2 = new QMenu(menubar);
+        menu_2->setObjectName("menu_2");
+        menu_3 = new QMenu(menubar);
+        menu_3->setObjectName("menu_3");
+        menu_4 = new QMenu(menubar);
+        menu_4->setObjectName("menu_4");
+        menu_5 = new QMenu(menubar);
+        menu_5->setObjectName("menu_5");
+        MainWindow->setMenuBar(menubar);
+        statusbar = new QStatusBar(MainWindow);
+        statusbar->setObjectName("statusbar");
+        MainWindow->setStatusBar(statusbar);
+
+        menubar->addAction(menu->menuAction());
+        menubar->addAction(menu_2->menuAction());
+        menubar->addAction(menu_3->menuAction());
+        menubar->addAction(menu_4->menuAction());
+        menubar->addAction(menu_5->menuAction());
+        menu->addAction(open);
+        menu->addAction(saveas);
+        menu_2->addAction(circle);
+        menu_2->addAction(square);
+        menu_2->addAction(ellipse);
+        menu_2->addAction(triangle);
+        menu_2->addAction(rectangle);
+        menu_3->addAction(group);
+        menu_3->addAction(ungroup);
+        menu_4->addAction(chooseColor);
+        menu_5->addAction(connectshapes);
+
+        retranslateUi(MainWindow);
+
+        QMetaObject::connectSlotsByName(MainWindow);
+    } // setupUi
+
+    void retranslateUi(QMainWindow *MainWindow)
+    {
+        MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "\320\222\320\270\320\267\321\203\320\260\320\273\321\214\320\275\321\213\320\271 \321\200\320\265\320\264\320\260\320\272\321\202\320\276\321\200 ++", nullptr));
+        open->setText(QCoreApplication::translate("MainWindow", "\320\236\321\202\320\272\321\200\321\213\321\202\321\214 \321\204\320\260\320\271\320\273", nullptr));
+        saveas->setText(QCoreApplication::translate("MainWindow", "\320\241\320\276\321\205\321\200\320\260\320\275\320\270\321\202\321\214 \320\262 \321\204\320\260\320\271\320\273", nullptr));
+        circle->setText(QCoreApplication::translate("MainWindow", "\320\232\321\200\321\203\320\263", nullptr));
+        square->setText(QCoreApplication::translate("MainWindow", "\320\232\320\262\320\260\320\264\321\200\320\260\321\202", nullptr));
+        ellipse->setText(QCoreApplication::translate("MainWindow", "\320\255\320\273\320\273\320\270\320\277\321\201", nullptr));
+        triangle->setText(QCoreApplication::translate("MainWindow", "\320\242\321\200\320\265\321\203\320\263\320\276\320\273\321\214\320\275\320\270\320\272", nullptr));
+        rectangle->setText(QCoreApplication::translate("MainWindow", "\320\237\321\200\321\217\320\274\320\276\321\203\320\263\320\276\320\273\321\214\320\275\320\270\320\272", nullptr));
+        group->setText(QCoreApplication::translate("MainWindow", "\320\223\321\200\321\203\320\277\320\277\320\270\321\200\320\276\320\262\320\260\321\202\321\214", nullptr));
+        ungroup->setText(QCoreApplication::translate("MainWindow", "\320\240\320\260\320\267\320\263\321\200\321\203\320\277\320\277\320\270\321\200\320\276\320\262\320\260\321\202\321\214", nullptr));
+        chooseColor->setText(QCoreApplication::translate("MainWindow", "\320\222\321\213\320\261\321\200\320\260\321\202\321\214 \321\206\320\262\320\265\321\202", nullptr));
+        connectshapes->setText(QCoreApplication::translate("MainWindow", "\320\241\320\262\321\217\320\267\320\260\321\202\321\214 \321\204\320\270\320\263\321\203\321\200\321\213", nullptr));
+        clearHistory->setText(QCoreApplication::translate("MainWindow", "\320\236\321\207\320\270\321\201\321\202\320\270\321\202\321\214 \320\270\321\201\321\202\320\276\321\200\320\270\321\216", nullptr));
+        label->setText(QCoreApplication::translate("MainWindow", "\320\230\321\201\321\202\320\276\321\200\320\270\321\217 \320\272\320\276\320\274\320\260\320\275\320\264:", nullptr));
+        QTreeWidgetItem *___qtreewidgetitem = treeWidget->headerItem();
+        ___qtreewidgetitem->setText(0, QCoreApplication::translate("MainWindow", "\320\224\320\265\321\200\320\265\320\262\320\276 \320\272\320\276\320\275\321\202\320\265\320\271\320\275\320\265\321\200\320\260 MyStorage", nullptr));
+        menu->setTitle(QCoreApplication::translate("MainWindow", "\320\244\320\260\320\271\320\273", nullptr));
+        menu_2->setTitle(QCoreApplication::translate("MainWindow", "\320\244\320\270\320\263\321\203\321\200\321\213", nullptr));
+        menu_3->setTitle(QCoreApplication::translate("MainWindow", "\320\223\321\200\321\203\320\277\320\277\320\270\321\200\320\276\320\262\320\272\320\260", nullptr));
+        menu_4->setTitle(QCoreApplication::translate("MainWindow", "\320\246\320\262\320\265\321\202", nullptr));
+        menu_5->setTitle(QCoreApplication::translate("MainWindow", "\320\241\320\262\321\217\320\267\320\260\321\202\321\214", nullptr));
+    } // retranslateUi
+
+};
+
+namespace Ui {
+    class MainWindow: public Ui_MainWindow {};
+} // namespace Ui
+
+QT_END_NAMESPACE
+
+#endif // UI_MAINWINDOW_H

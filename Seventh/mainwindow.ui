@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1119</width>
+    <height>696</height>
+   </rect>
+  </property>
+  <property name="focusPolicy">
+   <enum>Qt::FocusPolicy::StrongFocus</enum>
+  </property>
+  <property name="windowTitle">
+   <string>Визуальный редактор ++</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QFrame" name="frame">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>10</y>
+      <width>901</width>
+      <height>511</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Shape::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Shadow::Raised</enum>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="Commands">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>550</y>
+      <width>891</width>
+      <height>74</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="clearHistory">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>630</y>
+      <width>141</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Очистить историю</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>530</y>
+      <width>111</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>История команд:</string>
+    </property>
+   </widget>
+   <widget class="QTreeWidget" name="treeWidget">
+    <property name="geometry">
+     <rect>
+      <x>930</x>
+      <y>10</y>
+      <width>181</width>
+      <height>511</height>
+     </rect>
+    </property>
+    <column>
+     <property name="text">
+      <string>Дерево контейнера MyStorage</string>
+     </property>
+    </column>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1119</width>
+     <height>37</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Файл</string>
+    </property>
+    <addaction name="open"/>
+    <addaction name="saveas"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>Фигуры</string>
+    </property>
+    <addaction name="circle"/>
+    <addaction name="square"/>
+    <addaction name="ellipse"/>
+    <addaction name="triangle"/>
+    <addaction name="rectangle"/>
+   </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>Группировка</string>
+    </property>
+    <addaction name="group"/>
+    <addaction name="ungroup"/>
+   </widget>
+   <widget class="QMenu" name="menu_4">
+    <property name="title">
+     <string>Цвет</string>
+    </property>
+    <addaction name="chooseColor"/>
+   </widget>
+   <widget class="QMenu" name="menu_5">
+    <property name="title">
+     <string>Связать</string>
+    </property>
+    <addaction name="connectshapes"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
+   <addaction name="menu_3"/>
+   <addaction name="menu_4"/>
+   <addaction name="menu_5"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="open">
+   <property name="text">
+    <string>Открыть файл</string>
+   </property>
+  </action>
+  <action name="saveas">
+   <property name="text">
+    <string>Сохранить в файл</string>
+   </property>
+  </action>
+  <action name="circle">
+   <property name="text">
+    <string>Круг</string>
+   </property>
+  </action>
+  <action name="square">
+   <property name="text">
+    <string>Квадрат</string>
+   </property>
+  </action>
+  <action name="ellipse">
+   <property name="text">
+    <string>Эллипс</string>
+   </property>
+  </action>
+  <action name="triangle">
+   <property name="text">
+    <string>Треугольник</string>
+   </property>
+  </action>
+  <action name="rectangle">
+   <property name="text">
+    <string>Прямоугольник</string>
+   </property>
+  </action>
+  <action name="group">
+   <property name="text">
+    <string>Группировать</string>
+   </property>
+  </action>
+  <action name="ungroup">
+   <property name="text">
+    <string>Разгруппировать</string>
+   </property>
+  </action>
+  <action name="chooseColor">
+   <property name="text">
+    <string>Выбрать цвет</string>
+   </property>
+  </action>
+  <action name="connectshapes">
+   <property name="text">
+    <string>Связать фигуры</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
