@@ -1008,7 +1008,7 @@ public:
 
 class Command;
 
-class MyStorage: public Subject{
+class MyStorage: public Subject {
 
 private:
 
@@ -1023,7 +1023,7 @@ public:
     void AddObj(Shape* shape);
 
     void DelObj(Shape* shape) {
-        shapes.erase(find(selected_shapes.begin(), selected_shapes.end(), shape), selected_shapes.end());
+        shapes.erase(find(shapes.begin(), shapes.end(), shape), shapes.end());
         delete shape;
         notifyEveryone();
     };
@@ -1141,6 +1141,14 @@ public:
 
     void saveShapes(FILE* stream){
         qDebug() << "Storage::saveShapes(FILE* stream)";
+
+        for (Shape* shape: shapes){
+            if (dynamic_cast<Arrow*>(shape)){
+                shapes.erase(find(shapes.begin(), shapes.end(), shape), shapes.end());
+            }
+        }
+
+
         fprintf(stream, "%zu\n", shapes.size());
         for (Shape* shape: shapes){
             shape->save(stream);
@@ -1150,6 +1158,8 @@ public:
 
 
     void loadShapes(FILE* stream){
+        shapes.clear();
+        selected_shapes.clear();
         size_t count;
         Shape* shape;
         qDebug() << "Storage::saveShapes(FILE* stream)";
